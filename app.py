@@ -253,9 +253,12 @@ now_jst = datetime.now(timezone.utc) + timedelta(hours=9)
 # 日付
 date_input = st.sidebar.date_input("日付", now_jst.date())
 
-# ★★★ 変更点：時間を「何時台」のスライダーに変更 ★★★
-# スライダーをやめて、数字入力ボックスに変更
+# ★変更点1: 時刻（時）の入力
 hour_input = st.sidebar.number_input("時刻 (時)", min_value=0, max_value=23, value=now_jst.hour, step=1)
+
+# ★変更点2: 時刻（分）の選択肢を追加（10分刻み）
+# デフォルトは「0分」にしておきます
+minute_input = st.sidebar.selectbox("時刻 (分)", [0, 10, 20, 30, 40, 50], index=0)
 
 # 気温設定
 temp_input = st.sidebar.slider("気温 (℃)", 20, 40, 32)
@@ -266,8 +269,10 @@ if st.sidebar.button("リセット"):
     st.session_state.clear()
     st.rerun()
 
-# 時間オブジェクトを作成 (分は00分固定)
-time_val = time(hour_input, 0)
+# ★変更点3: 分の情報も使って時間オブジェクトを作成
+time_val = time(hour_input, minute_input)
+dt_jst = datetime.combine(date_input, time_val)
+dt_utc = dt_jst.replace(tzinfo=timezone.utc) - pd.Timedelta(hours=9)
 dt_jst = datetime.combine(date_input, time_val)
 dt_utc = dt_jst.replace(tzinfo=timezone.utc) - pd.Timedelta(hours=9)
 
