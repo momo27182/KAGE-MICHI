@@ -206,7 +206,7 @@ if 'end_candidates' not in st.session_state: st.session_state['end_candidates'] 
 st.sidebar.header("📍 ルート検索")
 
 st.sidebar.markdown("### 1. 地名を入力")
-start_input = st.sidebar.text_input("出発地", placeholder="例: JR和歌山駅")
+start_input = st.sidebar.text_input("出発地", placeholder="例: JR和歌山")
 end_input = st.sidebar.text_input("目的地", placeholder="例: 和歌山城")
 
 if st.sidebar.button("🔍 候補を検索"):
