@@ -8,3 +8,4 @@ shapely
 pysolar
 pandas
 geopy
+scikit-learn

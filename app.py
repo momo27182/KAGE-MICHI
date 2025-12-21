@@ -235,7 +235,7 @@ if st.session_state['end_candidates']:
     selected_end_coords = end_options[selected_end_name]
 
 if selected_start_coords and selected_end_coords:
-    if st.sidebar.button("🚀 このルートで検索"):
+    if st.sidebar.button("このルートで検索"):
         st.session_state['start_point'] = selected_start_coords
         st.session_state['end_point'] = selected_end_coords
         mid_lat = (selected_start_coords[0] + selected_end_coords[0]) / 2
