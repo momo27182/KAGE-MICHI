@@ -254,8 +254,8 @@ now_jst = datetime.now(timezone.utc) + timedelta(hours=9)
 date_input = st.sidebar.date_input("日付", now_jst.date())
 
 # ★★★ 変更点：時間を「何時台」のスライダーに変更 ★★★
-# 0時〜23時まで、デフォルトは現在時刻の「時」
-hour_input = st.sidebar.slider("時刻 (時)", 0, 23, now_jst.hour)
+# スライダーをやめて、数字入力ボックスに変更
+hour_input = st.sidebar.number_input("時刻 (時)", min_value=0, max_value=23, value=now_jst.hour, step=1)
 
 # 気温設定
 temp_input = st.sidebar.slider("気温 (℃)", 20, 40, 32)
