@@ -1,0 +1,11 @@
+streamlit
+streamlit-folium
+osmnx
+networkx
+folium
+geopandas
+shapely
+pysolar
+pandas
+geopy
+scikit-learn
