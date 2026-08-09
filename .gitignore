@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Generated and downloaded data
+data/**
+!data/README.md
+archive/hackathon_2025/cache/
+archive/hackathon_2025/動画/
+archive/hackathon_2025/shadow_map.html
+
+# Local runtime artifacts
+*.log
+!log.md
+
