@@ -18,6 +18,8 @@
 | `application` | 各境界を呼び出し、1回のルート計画処理を組み立てる | 上記すべて |
 | `presentation` | 結果をUIへ渡す表示用データへ変換する | `models` |
 
+具体的な外部接続とファイル永続化は`infrastructure/`へ置く。`infrastructure/osm_prepared.py`だけがOSM取得とOSMnx形式を知り、製品側は`SpatialDataSource`境界を通じて利用する。
+
 `benchmark_cases`、`performance`、`legacy_benchmark`は移行期間中の計測支援であり、製品の依存方向には含めない。
 
 ## 依存ルール
@@ -40,7 +42,7 @@ application -> data ------> models
 ## 段階移植
 
 1. Issue #3で共通型、境界Protocol、処理の組み立てを用意する
-2. Issue #4で`SpatialDataSource`のOSM取得実装とローカル読込実装を分ける
+2. Issue #4で`SpatialDataSource`のOSM取得実装とローカル読込実装を分ける。道路はGraphML、建物・地点はGeoPackage、追跡情報はJSON manifestとして保存する
 3. 影計算と経路探索をそれぞれのProtocol実装として移植する
 4. 最後にStreamlit UIを`presentation`と`application`へ接続する
 

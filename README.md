@@ -41,3 +41,11 @@ python -m venv .venv
 ```
 
 基準ケースは`benchmarks/cases.json`、性能計測の結果要約は`docs/performance-baseline.md`で管理します。
+
+OSMデータはアプリ実行時に取得せず、事前に加工済み成果物を作成します。
+
+```powershell
+.\.venv\Scripts\python.exe scripts\prepare_osm_data.py
+```
+
+生成物は`data/prepared/`へ保存され、Git管理対象外です。形式と出典の詳細は`data/README.md`、設計判断は`docs/decisions/0002-store-prepared-osm-as-graphml-and-geopackage.md`を参照してください。
