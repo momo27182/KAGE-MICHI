@@ -11,7 +11,7 @@ Phase 1「基準計測と再現環境」は完了しました。開発TODOは4/1
 ## 現在のブランチ
 
 - ブランチ: `agent/issue-3-package-structure`
-- 状態: Issue #3の実装・検証完了。未コミット、Pull Request未作成
+- 状態: Issue #3の実装・検証完了。GitHubでレビュー・統合する段階
 - 基準ブランチ: `main`
 - 最新マージ済みPR: [#2 P0の性能計測基盤を整備](https://github.com/momo27182/KAGE-MICHI/pull/2)
 - 現在のIssue: [#3 新規パッケージ構成を作る](https://github.com/momo27182/KAGE-MICHI/issues/3)
