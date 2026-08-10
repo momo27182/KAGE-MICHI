@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "coordinate_reference": "WGS84 (EPSG:4326)",
+  "cases": [
+    {
+      "id": "wakayama_station_to_tanakaguchi_summer_afternoon",
+      "description": "夏の午後に和歌山駅から田中口駅へ歩く正常系",
+      "category": "daylight_route",
+      "start": {"latitude": 34.2325, "longitude": 135.1917},
+      "destination": {"latitude": 34.2241, "longitude": 135.1906},
+      "departure_jst": "2024-08-01T14:00:00+09:00",
+      "temperature_c": 32,
+      "sun_penalty": 10,
+      "expectation": {
+        "status": "route",
+        "shadow_state": "daylight",
+        "required_metrics": ["route_distance_m", "walk_minutes", "shade_ratio_pct", "sunny_distance_m"]
+      }
+    },
+    {
+      "id": "wakayama_station_to_tanakaguchi_summer_morning",
+      "description": "同じ経路を午前に計算し、時間差を比較する正常系",
+      "category": "time_comparison",
+      "start": {"latitude": 34.2325, "longitude": 135.1917},
+      "destination": {"latitude": 34.2241, "longitude": 135.1906},
+      "departure_jst": "2024-08-01T09:00:00+09:00",
+      "temperature_c": 30,
+      "sun_penalty": 10,
+      "expectation": {
+        "status": "route",
+        "shadow_state": "daylight",
+        "required_metrics": ["route_distance_m", "walk_minutes", "shade_ratio_pct", "sunny_distance_m"]
+      }
+    },
+    {
+      "id": "wakayama_station_to_tanakaguchi_night",
+      "description": "太陽が地平線下にある夜間ケース",
+      "category": "night_route",
+      "start": {"latitude": 34.2325, "longitude": 135.1917},
+      "destination": {"latitude": 34.2241, "longitude": 135.1906},
+      "departure_jst": "2024-08-01T22:00:00+09:00",
+      "temperature_c": 28,
+      "sun_penalty": 10,
+      "expectation": {
+        "status": "route",
+        "shadow_state": "night",
+        "required_metrics": ["route_distance_m", "walk_minutes"]
+      }
+    },
+    {
+      "id": "same_start_and_destination",
+      "description": "出発地と目的地が同じ場合に経路なしとして扱う境界ケース",
+      "category": "no_route",
+      "start": {"latitude": 34.2325, "longitude": 135.1917},
+      "destination": {"latitude": 34.2325, "longitude": 135.1917},
+      "departure_jst": "2024-08-01T14:00:00+09:00",
+      "temperature_c": 32,
+      "sun_penalty": 10,
+      "expectation": {
+        "status": "no_route",
+        "shadow_state": "daylight",
+        "required_metrics": []
+      }
+    },
+    {
+      "id": "destination_outside_wakayama_station_scope",
+      "description": "固定グラフの対象範囲外を最寄りノードへ誤って吸着させないためのケース",
+      "category": "out_of_scope",
+      "start": {"latitude": 34.2325, "longitude": 135.1917},
+      "destination": {"latitude": 34.2300, "longitude": 135.1550},
+      "departure_jst": "2024-08-01T14:00:00+09:00",
+      "temperature_c": 32,
+      "sun_penalty": 10,
+      "expectation": {
+        "status": "out_of_scope",
+        "shadow_state": "not_evaluated",
+        "required_metrics": []
+      }
+    }
+  ]
+}
+

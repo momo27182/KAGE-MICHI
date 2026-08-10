@@ -30,4 +30,5 @@ archive/hackathon_2025/shadow_map.html
 # Local runtime artifacts
 *.log
 !log.md
+benchmark-results/
 
