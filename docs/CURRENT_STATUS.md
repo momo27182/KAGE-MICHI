@@ -1,6 +1,6 @@
 # KAGE-MICHI Current Status
 
-最終更新: 2026-08-09
+最終更新: 2026-08-10
 
 このファイルは、新しいチャットや作業者が短時間で現在地を把握するための引き継ぎ資料です。作業状況が変わるたびに短く上書きします。
 
@@ -11,9 +11,9 @@ Phase 1「基準計測と再現環境」は完了しました。開発TODOは4/1
 ## 現在のブランチ
 
 - ブランチ: `agent/p0-performance-foundation`
-- 状態: P0のPhase 1を実装・検証済み。未コミット
+- 状態: P0のPhase 1を実装・検証済み。PR #2でレビュー中
 - 基準ブランチ: `main`
-- 最新マージ済みPR: [#1 プロジェクト構成を整理](https://github.com/momo27182/KAGE-MICHI/pull/1)
+- 関連PR: [#2 P0の性能計測基盤を整備](https://github.com/momo27182/KAGE-MICHI/pull/2)
 
 ## 今回完了したこと
 

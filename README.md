@@ -26,7 +26,7 @@
 
 - リモート: `https://github.com/momo27182/KAGE-MICHI.git`
 - 基準ブランチ: `main`
-- 現在の構成整理ブランチ: `chore/project-structure`
+- 開発ブランチの命名例: `agent/p0-performance-foundation`
 
 新しい変更は目的ごとのブランチで行い、確認後にPull Requestで`main`へ統合します。大容量動画、取得キャッシュ、PLATEAU等の原本データ、秘密情報はGitへ直接追加しません。
 
