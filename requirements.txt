@@ -1,0 +1,13 @@
+# Direct dependencies verified together on Python 3.12.13 / Windows.
+streamlit==1.61.1
+streamlit-folium==0.27.4
+osmnx==2.1.1
+networkx==3.6.1
+folium==0.20.0
+geopandas==1.1.4
+shapely==2.1.2
+pysolar==0.13
+pandas==3.0.5
+geopy==2.5.0
+scikit-learn==1.9.0
+
