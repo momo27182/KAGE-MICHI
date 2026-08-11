@@ -4,16 +4,16 @@
 
 ## 現在のPhase
 
-Phase 2「処理分割とオフライン化」を進めています。開発TODOは9/23件完了（39%）で、Issue #11の画面機能棚卸しが完了しました。
+Phase 2「処理分割とオフライン化」を進めています。開発TODOは10/23件完了（43%）で、Issue #13の地名検索安定化を実装・検証済みです。
 
 ## 現在のブランチ
 
-- ブランチ: `agent/issue-11-ui-inventory`
-- 状態: Issue #11のDraft PR #12を作成し、レビュー待ち
+- ブランチ: `agent/issue-13-place-search`
+- 状態: Issue #13のDraft PR #14を作成し、レビュー待ち
 - 基準ブランチ: `main`
-- 最新マージ済みPR: [#10 軽量なStreamlit画面へ統合する](https://github.com/momo27182/KAGE-MICHI/pull/10)
-- 現在のIssue: [#11 ハッカソン版の画面機能を棚卸しする](https://github.com/momo27182/KAGE-MICHI/issues/11)
-- 現在のPR: [#12 ハッカソン版の画面機能を棚卸しする](https://github.com/momo27182/KAGE-MICHI/pull/12)
+- 最新マージ済みPR: [#12 ハッカソン版の画面機能を棚卸しする](https://github.com/momo27182/KAGE-MICHI/pull/12)
+- 現在のIssue: [#13 地名検索と候補選択を安定化する](https://github.com/momo27182/KAGE-MICHI/issues/13)
+- 現在のPR: [#14 地名検索と候補選択を安定化する](https://github.com/momo27182/KAGE-MICHI/pull/14)
 
 ## 今回完了したこと
 
@@ -30,6 +30,11 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 - 各機能を移行済み、直接移行、再設計、後回し、保留に分類した
 - 地図クリックの即時再実行、外部検索、独自暑熱判定などの性能・安全リスクを記録した
 - 不足していた「最短ルートとの比較」「別時刻との比較」をNotion開発TODOへ追加した
+- UI中立の検索結果・候補・状態モデルとNominatimアダプターを追加した
+- 明示検索、1秒間隔、7日キャッシュ、固有User-Agent、プロバイダー切替設定を実装した
+- 候補の重複排除、距離順、対象範囲内外、曖昧・候補なし・障害状態を分離した
+- 検索、候補選択、地点反映、経路計算を別操作としてStreamlitへ統合した
+- 日本語主要3駅を実検索し、和歌山駅34m、田中口駅624m、紀和駅1,466mで範囲内候補になることを確認した
 
 ## ブロッカー
 
@@ -37,9 +42,9 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 
 ## 次に行う3項目
 
-1. PR #12の差分とGitHub上の状態を確認する
+1. PR #14の差分とGitHub上の状態を確認する
 2. 問題がなければReady for reviewに変更し、squash mergeする
-3. 次のPhase 2タスク「地名検索を安定化する」にIssueを作成して着手する
+3. マージ後、次のPhase 2タスク「地図クリックでの地点指定を安定化する」に着手する
 
 ## 重要な測定値
 
@@ -49,7 +54,7 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 - 軽量画面初回: 5.723秒
 - 同一入力キャッシュ後: 0.007秒
 - 地点変更後: 0.389秒
-- 自動テスト: 25件成功
+- 自動テスト: 33件成功
 
 ## 現時点の重要な判断
 
@@ -59,16 +64,20 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 - ハッカソン版は原本として直接変更しない
 - ハッカソン版の独自暑熱判定は移植せず、公的情報源と更新時刻を伴うPhase 5の機能として再設計する
 - 最短ルートとの比較はPhase 2、別時刻との比較は時間帯別前計算後のPhase 4で実施する
+- 地名検索は明示操作だけで実行し、候補適用と経路計算を分ける
+- 公開Nominatimは自動補完に使わず、1リクエスト/秒、キャッシュ、固有User-Agentを守る
+- 日本語主要駅の検索補正は現在の固定範囲向け暫定策で、地域拡大時にローカル地名索引へ置き換える
 
 ## 参照先
 
 - [GitHub](https://github.com/momo27182/KAGE-MICHI)
 - [影計算と経路探索](shadow-routing.md)
 - [ハッカソン版の画面機能棚卸し](hackathon-ui-inventory.md)
+- [地名検索と候補選択](place-search.md)
 - [Notion KAGEMICHI](https://app.notion.com/p/3b7e0745b52580fcaa44d4d3d8ff52ff)
 - [開発TODO](https://app.notion.com/p/b9292d3f66bb41a0897720b6648bc91f)
 - [進捗記録](https://app.notion.com/p/3b7e0745b525815b99b0ce64d1a1239b)
 
 ## 新しいチャットへの依頼文
 
-> KAGE-MICHIの開発を続けます。最初に`AGENT.md`、`docs/CURRENT_STATUS.md`、Notionの最新進捗と進行中TODOを確認してください。Draft PR #12を確認し、問題がなければReady化・squash mergeしてください。
+> KAGE-MICHIの開発を続けます。最初に`AGENT.md`、`docs/CURRENT_STATUS.md`、Notionの最新進捗と進行中TODOを確認してください。Draft PR #14を確認し、問題がなければReady化・squash mergeしてください。
