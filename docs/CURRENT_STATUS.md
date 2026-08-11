@@ -4,16 +4,16 @@
 
 ## 現在のPhase
 
-Phase 2「処理分割とオフライン化」を進めています。開発TODOは7/17件完了（41%）で、Issue #9を実装中です。
+Phase 2「処理分割とオフライン化」を進めています。開発TODOは9/23件完了（39%）で、Issue #11の画面機能棚卸しが完了しました。
 
 ## 現在のブランチ
 
-- ブランチ: `agent/issue-9-lightweight-streamlit`
-- 状態: Issue #9のDraft PR #10を作成し、レビュー待ち
+- ブランチ: `agent/issue-11-ui-inventory`
+- 状態: Issue #11のDraft PR #12を作成し、レビュー待ち
 - 基準ブランチ: `main`
-- 最新マージ済みPR: [#8 影計算と経路探索を分離してテストする](https://github.com/momo27182/KAGE-MICHI/pull/8)
-- 現在のIssue: [#9 軽量なStreamlit画面へ統合する](https://github.com/momo27182/KAGE-MICHI/issues/9)
-- 現在のPR: [#10 軽量なStreamlit画面へ統合する](https://github.com/momo27182/KAGE-MICHI/pull/10)
+- 最新マージ済みPR: [#10 軽量なStreamlit画面へ統合する](https://github.com/momo27182/KAGE-MICHI/pull/10)
+- 現在のIssue: [#11 ハッカソン版の画面機能を棚卸しする](https://github.com/momo27182/KAGE-MICHI/issues/11)
+- 現在のPR: [#12 ハッカソン版の画面機能を棚卸しする](https://github.com/momo27182/KAGE-MICHI/pull/12)
 
 ## 今回完了したこと
 
@@ -26,6 +26,10 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 - データ・影・経路を独立キャッシュする軽量Streamlit画面を実装した
 - 経路線、計算・データ時刻、出典、推定限界を画面表示した
 - キャッシュ後0.007秒、地点変更後0.389秒を実測した
+- ハッカソン版のコード、派生版、初期検証、18枚の発表資料から画面機能を棚卸しした
+- 各機能を移行済み、直接移行、再設計、後回し、保留に分類した
+- 地図クリックの即時再実行、外部検索、独自暑熱判定などの性能・安全リスクを記録した
+- 不足していた「最短ルートとの比較」「別時刻との比較」をNotion開発TODOへ追加した
 
 ## ブロッカー
 
@@ -33,9 +37,9 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 
 ## 次に行う3項目
 
-1. PR #10の差分とGitHub上の状態を確認する
-2. 問題がなければReady for reviewに変更する
-3. 最終確認後にPR #10をマージし、Issue #9を閉じる
+1. PR #12の差分とGitHub上の状態を確認する
+2. 問題がなければReady for reviewに変更し、squash mergeする
+3. 次のPhase 2タスク「地名検索を安定化する」にIssueを作成して着手する
 
 ## 重要な測定値
 
@@ -53,15 +57,18 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 - 影計算と経路探索を独立させ、時刻変更時に必要な処理だけ再実行できる境界を保つ
 - 現行精度（高さ欠損10m、凸包影、道路中央点判定）は維持し、精度改善は別Issueで比較可能にする
 - ハッカソン版は原本として直接変更しない
+- ハッカソン版の独自暑熱判定は移植せず、公的情報源と更新時刻を伴うPhase 5の機能として再設計する
+- 最短ルートとの比較はPhase 2、別時刻との比較は時間帯別前計算後のPhase 4で実施する
 
 ## 参照先
 
 - [GitHub](https://github.com/momo27182/KAGE-MICHI)
 - [影計算と経路探索](shadow-routing.md)
+- [ハッカソン版の画面機能棚卸し](hackathon-ui-inventory.md)
 - [Notion KAGEMICHI](https://app.notion.com/p/3b7e0745b52580fcaa44d4d3d8ff52ff)
 - [開発TODO](https://app.notion.com/p/b9292d3f66bb41a0897720b6648bc91f)
 - [進捗記録](https://app.notion.com/p/3b7e0745b525815b99b0ce64d1a1239b)
 
 ## 新しいチャットへの依頼文
 
-> KAGE-MICHIの開発を続けます。最初に`AGENT.md`、`docs/CURRENT_STATUS.md`、Notionの最新進捗と進行中TODOを確認してください。Draft PR #10を確認し、問題がなければマージへ進んでください。
+> KAGE-MICHIの開発を続けます。最初に`AGENT.md`、`docs/CURRENT_STATUS.md`、Notionの最新進捗と進行中TODOを確認してください。Draft PR #12を確認し、問題がなければReady化・squash mergeしてください。
