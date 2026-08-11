@@ -10,9 +10,16 @@ from time import perf_counter
 import streamlit as st
 
 from ..data import SpatialDataset
+from ..geocoding import PlaceSearchOutcome, SearchArea, search_places
 from ..models import GeoPoint, RouteResult
 from ..shadows import ShadowResult
-from .osm_prepared import load_prepared_dataset, validate_dataset_scope
+from .nominatim_geocoder import NominatimPlaceGeocoder
+from .osm_prepared import (
+    MANIFEST_FILE,
+    PreparedDatasetManifest,
+    load_prepared_dataset,
+    validate_dataset_scope,
+)
 from .shade_route_planner import MidpointShadeRoutePlanner
 from .shadow_calculator import BuildingShadowCalculator
 
@@ -29,6 +36,35 @@ class TimedRoute:
     result: RouteResult
     elapsed_seconds: float
     calculated_at: datetime
+
+
+@st.cache_resource
+def get_place_geocoder(
+    domain: str, user_agent: str, timeout_seconds: float
+) -> NominatimPlaceGeocoder:
+    return NominatimPlaceGeocoder(
+        domain=domain,
+        user_agent=user_agent,
+        timeout_seconds=timeout_seconds,
+    )
+
+
+@st.cache_data(ttl=7 * 24 * 60 * 60, max_entries=256, show_spinner="地名を検索しています…")
+def search_places_cached(
+    query: str,
+    data_directory: str,
+    data_version: str,
+    domain: str,
+    user_agent: str,
+    timeout_seconds: float = 5.0,
+) -> PlaceSearchOutcome:
+    del data_version
+    manifest = PreparedDatasetManifest.from_json(
+        Path(data_directory) / MANIFEST_FILE
+    )
+    area = SearchArea(GeoPoint(**manifest.center), manifest.radius_m)
+    geocoder = get_place_geocoder(domain, user_agent, timeout_seconds)
+    return search_places(query, geocoder, area)
 
 
 @st.cache_resource(show_spinner="加工済み地図データを読み込んでいます…")
