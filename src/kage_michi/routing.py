@@ -9,6 +9,10 @@ from .models import GeoPoint, RouteResult
 from .shadows import ShadowResult
 
 
+class RouteNotFoundError(RuntimeError):
+    """Raised when the prepared graph cannot connect the requested points."""
+
+
 class RoutePlanner(Protocol):
     def find_route(
         self,
