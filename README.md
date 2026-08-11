@@ -49,3 +49,11 @@ OSMデータはアプリ実行時に取得せず、事前に加工済み成果�
 ```
 
 生成物は`data/prepared/`へ保存され、Git管理対象外です。形式と出典の詳細は`data/README.md`、設計判断は`docs/decisions/0002-store-prepared-osm-as-graphml-and-geopackage.md`を参照してください。
+
+影計算と経路探索はUIから独立して実行・計測できます。
+
+```powershell
+.\.venv\Scripts\python.exe scripts\measure_shadow_routing.py
+```
+
+計算の入出力、現在の簡易モデル、既知の制約は`docs/shadow-routing.md`に記録しています。
