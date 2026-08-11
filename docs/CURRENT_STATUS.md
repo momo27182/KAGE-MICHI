@@ -4,16 +4,16 @@
 
 ## 現在のPhase
 
-Phase 2「処理分割とオフライン化」を進めています。開発TODOは6/17件完了（35%）で、Issue #7を実装中です。
+Phase 2「処理分割とオフライン化」を進めています。開発TODOは7/17件完了（41%）で、Issue #9を実装中です。
 
 ## 現在のブランチ
 
-- ブランチ: `agent/issue-7-shadow-routing`
-- 状態: Issue #7のDraft PR #8を作成し、レビュー待ち
+- ブランチ: `agent/issue-9-lightweight-streamlit`
+- 状態: Issue #9のDraft PR #10を作成し、レビュー待ち
 - 基準ブランチ: `main`
-- 最新マージ済みPR: [#6 OSM取得とローカル読込を分離](https://github.com/momo27182/KAGE-MICHI/pull/6)
-- 現在のIssue: [#7 影計算と経路探索を分離してテストする](https://github.com/momo27182/KAGE-MICHI/issues/7)
-- 現在のPR: [#8 影計算と経路探索を分離してテストする](https://github.com/momo27182/KAGE-MICHI/pull/8)
+- 最新マージ済みPR: [#8 影計算と経路探索を分離してテストする](https://github.com/momo27182/KAGE-MICHI/pull/8)
+- 現在のIssue: [#9 軽量なStreamlit画面へ統合する](https://github.com/momo27182/KAGE-MICHI/issues/9)
+- 現在のPR: [#10 軽量なStreamlit画面へ統合する](https://github.com/momo27182/KAGE-MICHI/pull/10)
 
 ## 今回完了したこと
 
@@ -22,6 +22,10 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 - 夜間、高さ欠損10m補完、経路なし、固定入力の再現テストを追加した
 - 実データで影計算2.687秒、経路探索0.239秒を個別計測した
 - 現行の凸包影、中央点判定、固定倍率などの制約を文書化した
+- Issue #7をPR #8でmainへ統合した
+- データ・影・経路を独立キャッシュする軽量Streamlit画面を実装した
+- 経路線、計算・データ時刻、出典、推定限界を画面表示した
+- キャッシュ後0.007秒、地点変更後0.389秒を実測した
 
 ## ブロッカー
 
@@ -29,16 +33,19 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 
 ## 次に行う3項目
 
-1. PR #8の差分とGitHub上の状態を確認する
+1. PR #10の差分とGitHub上の状態を確認する
 2. 問題がなければReady for reviewに変更する
-3. 最終確認後にPR #8をマージし、Issue #7を閉じる
+3. 最終確認後にPR #10をマージし、Issue #9を閉じる
 
 ## 重要な測定値
 
 - 加工済みOSMローカル読込: 0.76〜1.15秒
 - 影計算: 2.687秒（7,870建物、7,865影ポリゴン）
 - 経路探索: 0.239秒（21ノード、1,294.543m、中央点判定の日陰率30.366%）
-- 自動テスト: 20件成功
+- 軽量画面初回: 5.723秒
+- 同一入力キャッシュ後: 0.007秒
+- 地点変更後: 0.389秒
+- 自動テスト: 25件成功
 
 ## 現時点の重要な判断
 
@@ -57,4 +64,4 @@ Phase 2「処理分割とオフライン化」を進めています。開発TODO
 
 ## 新しいチャットへの依頼文
 
-> KAGE-MICHIの開発を続けます。最初に`AGENT.md`、`docs/CURRENT_STATUS.md`、Notionの最新進捗と進行中TODOを確認してください。Draft PR #8を確認し、問題がなければマージへ進んでください。
+> KAGE-MICHIの開発を続けます。最初に`AGENT.md`、`docs/CURRENT_STATUS.md`、Notionの最新進捗と進行中TODOを確認してください。Draft PR #10を確認し、問題がなければマージへ進んでください。

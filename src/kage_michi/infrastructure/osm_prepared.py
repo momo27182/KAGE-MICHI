@@ -196,12 +196,18 @@ class PreparedOsmDataSource:
 
     def load(self, start: GeoPoint, destination: GeoPoint) -> SpatialDataset:
         dataset = load_prepared_dataset(self.directory)
-        manifest = dataset.payload.manifest
-        center = GeoPoint(**manifest.center)
-        for label, point in (("start", start), ("destination", destination)):
-            if _distance_m(center, point) > manifest.radius_m:
-                raise ValueError(f"{label} is outside the prepared dataset scope")
+        validate_dataset_scope(dataset, start, destination)
         return dataset
+
+
+def validate_dataset_scope(
+    dataset: SpatialDataset, start: GeoPoint, destination: GeoPoint
+) -> None:
+    manifest = dataset.payload.manifest
+    center = GeoPoint(**manifest.center)
+    for label, point in (("start", start), ("destination", destination)):
+        if _distance_m(center, point) > manifest.radius_m:
+            raise ValueError(f"{label} is outside the prepared dataset scope")
 
 
 def prepare_osm_dataset(
