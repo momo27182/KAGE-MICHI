@@ -12,6 +12,11 @@
 
 細かな実装方法や一時的な試行は `log.md` に残し、すべてをADRにはしません。
 
+## 採用済み
+
+- `0001-preprocess-osm-data-offline.md`: OSMデータを検索時ではなく事前処理する
+- `0002-store-prepared-osm-as-graphml-and-geopackage.md`: 加工済み道路・建物・地点とmanifestの保存形式
+
 ## ファイル名
 
 `NNNN-short-title.md` の形式にします。
