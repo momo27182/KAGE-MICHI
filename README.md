@@ -57,3 +57,13 @@ OSMデータはアプリ実行時に取得せず、事前に加工済み成果�
 ```
 
 計算の入出力、現在の簡易モデル、既知の制約は`docs/shadow-routing.md`に記録しています。
+
+## 軽量Streamlit画面
+
+事前生成済みデータがある状態で、次のコマンドから新しい画面を起動できます。
+
+```powershell
+.\.venv\Scripts\python.exe -m streamlit run src\streamlit_app.py
+```
+
+同じ日時・地点の再表示ではデータ、影、経路のキャッシュを再利用します。再計算範囲と実測値は`docs/lightweight-ui.md`を参照してください。

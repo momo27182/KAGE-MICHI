@@ -19,6 +19,7 @@ PRODUCT_MODULES = {
     "heat",
     "application",
     "presentation",
+    "ui",
 }
 
 
