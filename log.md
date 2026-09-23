@@ -566,3 +566,35 @@ Issue #9の差分と画面を最終確認し、コミット・プッシュ、`Cl
 - 実装と記録を`16e58f7`（最短ルートと日陰優先ルートを比較表示する）としてコミットし、`codex/issue-21-route-comparison`へプッシュ。
 - [Draft PR #22 最短ルートと日陰優先ルートを比較表示する](https://github.com/momo27182/KAGE-MICHI/pull/22)を作成。本文に`Closes #21`を記載した。
 - 次はPR #22の差分・GitHub状態を確認し、問題がなければReady化・squash mergeする。
+
+## 2026-09-23 PR #22をsquash merge
+
+- PR #22の全12ファイルをレビュー。GitHubは`CLEAN`・`MERGEABLE`、必須チェック登録なし、`Closes #21`記載済みを確認。
+- 全45テスト（15.851秒）、compileall、origin/mainとの差分チェックに成功し、修正が必要な問題なしと判断。
+- PR #22をReady化してsquash merge。mainコミット`cee2924`。Issue #21は自動クローズ。
+- ローカルmainをorigin/mainへfast-forward同期し、統合後も全45テスト（15.787秒）とcompileallに成功。
+- このマージ後記録はローカル未コミット。次の作業ブランチへ引き継ぐ。
+
+## 2026-09-23 Phase 2後半の完了確認
+
+- Notion開発TODOを集計し、Phase 2は10/10件すべて状態「完了」・完了条件確認済み。GitHubの未完了Issueは0件。
+- ロードマップの条件と実装を照合。コード分割、加工済みOSM、キャッシュ、主要計算テスト、軽量画面、機能棚卸し、地名検索、地図クリック、実ブラウザー検証、施設表示、最短比較がmainへ統合済み。
+- main同期後の全45テスト・compileall成功、同一条件の代表経路比較0.006秒。UIを起動せず影・経路をテストでき、Phase 2の完了条件を満たすと判断。
+- Phase 2後半を完了とし、次はPhase 3「PLATEAU小範囲検証」へ移行する。最初の作業はPLATEAUデータと利用条件の調査。
+- `docs/CURRENT_STATUS.md`と`docs/hackathon-ui-inventory.md`を現状へ更新。記録変更はローカル未コミットで、次の作業ブランチへ引き継ぐ。
+
+## 2026-09-23 Issue #23 PLATEAUデータと利用条件の調査
+
+- [Issue #23](https://github.com/momo27182/KAGE-MICHI/issues/23)を作成し、`codex/issue-23-plateau-research`で着手。Notion TODOを進行中へ更新した。
+- 公式CKAN APIから、和歌山市2023年度・CityGML v4・標準製品仕様書4.1・建築物LOD1/LOD2を確認。
+- CityGML配布URLへHEAD確認し、HTTP 200、939,693,415 bytes、Range対応、ETag `c15ded3d34ee50b1c22b1bde668dfc93`を確認。本体は未取得。
+- 和歌山駅の3次メッシュ候補を`51352175`と算出。半径1.7kmは隣接メッシュ、索引図、GML Envelopeで確定する方針。
+- ライセンス・出典表示、CRS・高さ、取得更新、Git除外、次の前処理入出力と検証条件を`docs/plateau-data-research.md`へ記録し、`data/README.md`へ配置方針を追記。
+- 調査はローカル完了。変更は未コミット・未プッシュで、NotionはGitHub統合前のため進行中を維持。
+
+## 2026-09-23 Issue #23のDraft PRを作成
+
+- 差分を最終レビューし、全45テスト、compileall、`git diff --check`、秘密情報パターン確認に成功。
+- 調査と記録を`1a9b3dd`（PLATEAUデータと利用条件を調査する）としてコミットし、`codex/issue-23-plateau-research`へプッシュ。
+- [Draft PR #24 PLATEAUデータと利用条件を調査する](https://github.com/momo27182/KAGE-MICHI/pull/24)を作成。本文に`Closes #23`を記載した。
+- 次はPR #24の差分・GitHub状態を確認し、問題がなければReady化・squash mergeする。GitHub統合前のためNotion TODOは進行中を維持。
