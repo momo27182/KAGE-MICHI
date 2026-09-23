@@ -559,3 +559,10 @@ Issue #9の差分と画面を最終確認し、コミット・プッシュ、`Cl
 - 比較ルートが異なる場合と同一の場合の単体テストを追加。設計・代表値・制約は`docs/route-comparison.md`へ記録。
 - 全45テスト（11.904秒）、compileall、`git diff --check`成功。ローカル実装・実画面検証を完了し、Notionへ反映。
 - 変更は未コミット・未プッシュ。次はユーザー依頼後にコミット・プッシュ・`Closes #21`付きPR作成。
+
+## 2026-09-23 Issue #21のDraft PRを作成
+
+- 差分を最終レビューし、全45テスト（15.511秒）、compileall、`git diff --check`の成功を再確認。
+- 実装と記録を`16e58f7`（最短ルートと日陰優先ルートを比較表示する）としてコミットし、`codex/issue-21-route-comparison`へプッシュ。
+- [Draft PR #22 最短ルートと日陰優先ルートを比較表示する](https://github.com/momo27182/KAGE-MICHI/pull/22)を作成。本文に`Closes #21`を記載した。
+- 次はPR #22の差分・GitHub状態を確認し、問題がなければReady化・squash mergeする。
