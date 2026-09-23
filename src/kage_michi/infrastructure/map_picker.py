@@ -9,13 +9,18 @@ from ..map_selection import validate_selection
 from ..models import GeoPoint
 
 
-def clear_candidate() -> None:
+def clear_candidate(remount: bool = True) -> None:
     generation = st.session_state.get("map_generation", 0)
-    st.session_state.pop(f"map_picker_{generation}", None)
     st.session_state.pop("map_pending", None)
     st.session_state.pop("map_error", None)
-    st.session_state.pop("map_last_click", None)
-    st.session_state["map_generation"] = generation + 1
+    if remount:
+        st.session_state.pop(f"map_picker_{generation}", None)
+        st.session_state.pop("map_last_click", None)
+        st.session_state["map_generation"] = generation + 1
+        if "map_center" in st.session_state:
+            st.session_state["map_render_center"] = dict(st.session_state["map_center"])
+        if "map_zoom" in st.session_state:
+            st.session_state["map_render_zoom"] = st.session_state["map_zoom"]
 
 
 def confirm_candidate(area: SearchArea) -> None:
@@ -34,7 +39,9 @@ def confirm_candidate(area: SearchArea) -> None:
         return
     st.session_state[f"{role}_latitude"] = point.latitude
     st.session_state[f"{role}_longitude"] = point.longitude
-    clear_candidate()
+    # Confirmation only changes the dynamic feature group. Keeping the current
+    # component avoids a tile reload and the temporary grey map background.
+    clear_candidate(remount=False)
 
 
 def receive_event(key: str, area: SearchArea) -> None:
@@ -67,6 +74,8 @@ def render_picker(area: SearchArea, scope_key: tuple, coordinates=()) -> None:
         st.session_state["map_scope"] = scope_key
         st.session_state["map_center"] = {"lat": area.center.latitude, "lng": area.center.longitude}
         st.session_state["map_zoom"] = 15
+        st.session_state["map_render_center"] = dict(st.session_state["map_center"])
+        st.session_state["map_render_zoom"] = st.session_state["map_zoom"]
     st.subheader("地図から地点を選択")
     st.radio("変更する地点", ["start", "destination"], key="map_role",
              format_func=lambda role: "出発地" if role == "start" else "目的地",
@@ -83,24 +92,52 @@ def render_picker(area: SearchArea, scope_key: tuple, coordinates=()) -> None:
     right.button("候補を取消・再選択", key="map_cancel", on_click=clear_candidate)
     # Keep the base script stable; replace only the dynamic FeatureGroup.
     base = folium.Map(location=[area.center.latitude, area.center.longitude], zoom_start=15)
+    base.get_root().header.add_child(folium.Element("""
+        <style>
+        .endpoint-marker {
+            pointer-events: none !important;
+            width: 22px !important;
+            height: 22px !important;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .55);
+            color: white;
+            font: 700 12px/16px sans-serif;
+            text-align: center;
+        }
+        .endpoint-start { background: #1976d2; }
+        .endpoint-destination { background: #d32f2f; }
+        </style>
+    """))
     features = folium.FeatureGroup(name="地点と経路")
     folium.Circle([area.center.latitude, area.center.longitude], radius=area.radius_m,
                   color="#777777", fill=False, tooltip="データ対象範囲").add_to(features)
-    for role, label, color in [("start", "出発地", "blue"), ("destination", "目的地", "red")]:
+    for role, label in [("start", "出発地"), ("destination", "目的地")]:
         try:
             point = GeoPoint(st.session_state[f"{role}_latitude"], st.session_state[f"{role}_longitude"])
         except ValueError:
             st.warning(f"{label}の緯度経度を確認してください。")
             continue
-        folium.Marker([point.latitude, point.longitude],
-                      tooltip=label, icon=folium.Icon(color=color)).add_to(features)
+        # CSS makes confirmed endpoints display-only so an exact click reaches
+        # the map and triggers same-point validation.
+        icon = folium.DivIcon(
+            class_name=f"endpoint-marker endpoint-{role}",
+            html="S" if role == "start" else "G",
+            icon_size=(22, 22), icon_anchor=(11, 11),
+        )
+        folium.Marker([point.latitude, point.longitude], icon=icon,
+                      tooltip=label).add_to(features)
     if pending:
         folium.Marker([pending.latitude, pending.longitude], tooltip="未確定の候補",
                       icon=folium.Icon(color="orange")).add_to(features)
     if len(coordinates) >= 2:
         folium.PolyLine(coordinates, color="#167d4a", weight=7).add_to(features)
     key = f"map_picker_{st.session_state['map_generation']}"
+    # Freeze the controlled view for this component generation. Feeding each pan
+    # back as a changed prop can trigger setView and undo the user's movement.
+    render_center = st.session_state.setdefault("map_render_center", dict(st.session_state["map_center"]))
+    render_zoom = st.session_state.setdefault("map_render_zoom", st.session_state["map_zoom"])
     st_folium(base, key=key, height=460, use_container_width=True,
               returned_objects=["last_clicked", "center", "zoom"],
-              center=st.session_state["map_center"], zoom=st.session_state["map_zoom"],
+              center=render_center, zoom=render_zoom,
               feature_group_to_add=features, on_change=lambda: receive_event(key, area))
