@@ -21,3 +21,14 @@ PLATEAUや気象データを追加するときは、入手元、取得日、対�
 
 同名の成果物がある場合は誤上書きを防ぐため停止します。意図して更新するときだけ`--overwrite`を指定します。OpenStreetMapデータを表示・配布する場合は、`© OpenStreetMap contributors`と[著作権・ライセンス情報](https://www.openstreetmap.org/copyright)を表示してください。
 
+## PLATEAUデータ
+
+和歌山駅周辺の小範囲検証には、和歌山市2023年度のCityGML（v4）を使用します。調査結果と利用条件は `docs/plateau-data-research.md` を参照してください。
+
+- 原本: `data/raw/plateau/30201_wakayama-shi_2023/`
+- 加工物: `data/prepared/plateau/wakayama-station/`
+- 原本・加工物ともにGit管理対象外
+- Gitへ含めるのは、取得元、版、取得日時、対象メッシュ、CRS変換、件数、チェックサム等を記録した小さなmanifestと処理コードだけ
+
+約940MBの配布ZIPをアプリ実行時に取得・解析しません。オフライン前処理で対象メッシュを絞り、実行時は加工済みデータを読み込みます。
+
