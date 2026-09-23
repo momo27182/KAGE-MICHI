@@ -86,6 +86,13 @@ class MapScreenTests(unittest.TestCase):
             app = AppTest.from_file(str(ROOT / "src/streamlit_app.py")).run(timeout=30)
             app.text_input[0].set_value(directory).run()
             self.assertFalse(app.exception)
+            initial_key = map_view.call_args.kwargs["key"]
+            initial_center = map_view.call_args.kwargs["center"]
+            app.session_state["map_center"] = {"lat": 34.231, "lng": 135.194}
+            app.session_state["map_zoom"] = 16
+            app.run()
+            self.assertEqual(map_view.call_args.kwargs["center"], initial_center)
+            self.assertEqual(map_view.call_args.kwargs["zoom"], 15)
             app.session_state["map_pending"] = GeoPoint(34.23, 135.19)
             app.run()
             features = map_view.call_args.kwargs["feature_group_to_add"]
@@ -94,11 +101,19 @@ class MapScreenTests(unittest.TestCase):
             self.assertIn([34.23, 135.19], markers)
             app.button(key="map_confirm").click().run()
             self.assertFalse(app.exception)
+            self.assertEqual(map_view.call_args.kwargs["key"], initial_key)
+            self.assertEqual(map_view.call_args.kwargs["center"], initial_center)
+            self.assertEqual(map_view.call_args.kwargs["zoom"], 15)
             self.assertEqual(app.number_input(key="start_latitude").value, 34.23)
             features = map_view.call_args.kwargs["feature_group_to_add"]
             markers = [child.location for child in features._children.values()
                        if type(child) is folium.Marker]
             self.assertEqual(markers, [[34.23, 135.19], [34.2241, 135.1906]])
+            marker_classes = [next(iter(child._children.values())).options["class_name"]
+                              for child in features._children.values()
+                              if type(child) is folium.Marker]
+            self.assertEqual(marker_classes, ["endpoint-marker endpoint-start",
+                                               "endpoint-marker endpoint-destination"])
             app.radio(key="map_role").set_value("destination").run()
             app.session_state["map_pending"] = GeoPoint(34.225, 135.19)
             app.run()
