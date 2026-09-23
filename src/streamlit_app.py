@@ -17,6 +17,7 @@ from kage_michi.map_selection import validate_selection
 from kage_michi.infrastructure.ui_runtime import (
     calculate_route_cached,
     calculate_shadows_cached,
+    load_facilities_cached,
     load_dataset_cached,
     search_places_cached,
 )
@@ -146,6 +147,9 @@ with st.sidebar:
     departure_date = st.date_input("出発日", value=datetime.now(JST).date())
     departure_time = st.time_input("出発時刻", value=time(14, 0))
     sun_penalty = st.slider("日向の距離ペナルティ", 1.0, 20.0, 10.0, 1.0)
+    st.subheader("周辺施設")
+    show_convenience = st.checkbox("コンビニ", value=True)
+    show_drinking_water = st.checkbox("給水地点", value=True)
     calculate = st.button("経路を計算", type="primary", use_container_width=True)
 
 st.info(
@@ -252,4 +256,28 @@ else:
     st.write("サイドバーで条件を確認し、「経路を計算」を押してください。")
 
 if area is not None:
-    render_picker(area, (str(dataset_path), data_version), coordinates)
+    facilities = ()
+    try:
+        all_facilities = load_facilities_cached(str(dataset_path), data_version)
+        enabled = set()
+        if show_convenience:
+            enabled.add("convenience")
+        if show_drinking_water:
+            enabled.add("drinking_water")
+        facilities = tuple(item for item in all_facilities if item.kind in enabled)
+        convenience_count = sum(item.kind == "convenience" for item in all_facilities)
+        water_count = sum(item.kind == "drinking_water" for item in all_facilities)
+        st.caption(
+            f"周辺施設（加工済みデータ）: コンビニ {convenience_count}件 / "
+            f"給水地点 {water_count}件"
+        )
+        st.caption(
+            f"出典: {manifest.attribution} / データ取得処理日時: "
+            f"{manifest.acquired_at_utc}。OSMの登録状況と取得時点に依存し、"
+            "営業・利用可能であることを保証しません。"
+        )
+    except (OSError, ValueError) as error:
+        st.warning(f"周辺施設を読み込めません: {error}")
+    render_picker(
+        area, (str(dataset_path), data_version), coordinates, facilities
+    )

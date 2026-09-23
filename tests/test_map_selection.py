@@ -12,6 +12,7 @@ from streamlit.testing.v1 import AppTest
 from kage_michi.geocoding import SearchArea
 from kage_michi.models import GeoPoint
 from kage_michi.infrastructure import map_picker
+from kage_michi.infrastructure.facilities import FacilityMarker
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,15 +78,27 @@ class MapScreenTests(unittest.TestCase):
     def test_confirm_cancel_and_role_switch_do_not_compute(self):
         with tempfile.TemporaryDirectory() as directory, \
              patch("kage_michi.infrastructure.osm_prepared.PreparedDatasetManifest.from_json",
-                   return_value=SimpleNamespace(center={"latitude": 34.2325, "longitude": 135.1917}, radius_m=1700)), \
+                   return_value=SimpleNamespace(
+                       center={"latitude": 34.2325, "longitude": 135.1917},
+                       radius_m=1700,
+                       attribution="© OpenStreetMap contributors",
+                       acquired_at_utc="2026-08-10T13:26:00+00:00",
+                   )), \
              patch("kage_michi.infrastructure.ui_runtime.load_dataset_cached") as load, \
              patch("kage_michi.infrastructure.ui_runtime.calculate_shadows_cached") as shadows, \
              patch("kage_michi.infrastructure.ui_runtime.calculate_route_cached") as route, \
+             patch("kage_michi.infrastructure.ui_runtime.load_facilities_cached",
+                   return_value=(
+                       FacilityMarker("convenience", "店舗", 34.231, 135.192),
+                       FacilityMarker("drinking_water", "給水", 34.230, 135.191),
+                   )) as facilities, \
              patch("kage_michi.infrastructure.map_picker.st_folium") as map_view:
             Path(directory, "manifest.json").write_text("{}", encoding="utf-8")
             app = AppTest.from_file(str(ROOT / "src/streamlit_app.py")).run(timeout=30)
             app.text_input[0].set_value(directory).run()
             self.assertFalse(app.exception)
+            self.assertTrue(any("コンビニ 1件 / 給水地点 1件" in item.value
+                                for item in app.caption))
             initial_key = map_view.call_args.kwargs["key"]
             initial_center = map_view.call_args.kwargs["center"]
             app.session_state["map_center"] = {"lat": 34.231, "lng": 135.194}
@@ -114,6 +127,16 @@ class MapScreenTests(unittest.TestCase):
                               if type(child) is folium.Marker]
             self.assertEqual(marker_classes, ["endpoint-marker endpoint-start",
                                                "endpoint-marker endpoint-destination"])
+            facility_markers = [child for child in features._children.values()
+                                if type(child) is folium.CircleMarker]
+            self.assertEqual(len(facility_markers), 2)
+            app.checkbox[1].uncheck().run()
+            filtered_features = map_view.call_args.kwargs["feature_group_to_add"]
+            self.assertEqual(
+                len([child for child in filtered_features._children.values()
+                     if type(child) is folium.CircleMarker]),
+                1,
+            )
             app.radio(key="map_role").set_value("destination").run()
             app.session_state["map_pending"] = GeoPoint(34.225, 135.19)
             app.run()
@@ -126,6 +149,7 @@ class MapScreenTests(unittest.TestCase):
             self.assertTrue(app.button(key="map_confirm").disabled)
             self.assertFalse(app.exception)
             load.assert_not_called()
+            facilities.assert_called()
             shadows.assert_not_called()
             route.assert_not_called()
 
