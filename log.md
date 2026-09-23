@@ -515,3 +515,28 @@ Issue #9の差分と画面を最終確認し、コミット・プッシュ、`Cl
 - [Draft PR #18 地図クリックの実ブラウザー検証と表示安定化](https://github.com/momo27182/KAGE-MICHI/pull/18)を作成。本文に`Closes #17`を記載。
 - 実装コミット`5f996a9`。PRは録画確認記録コミット`cc28fd9`を含む。squash merge時はmainへ1コミットとして統合される。
 - 次はPR #18の差分・GitHub状態を確認し、問題がなければReady化・squash mergeする。
+
+## 2026-09-23 PR #18をsquash merge
+
+- PR #18をReady化し、差分・競合・GitHub状態を確認後にsquash merge。mainコミット`dffb817`。
+- Issue #17は`Closes #17`により自動クローズ。ローカルmainをorigin/mainへfast-forward同期。
+- 必須GitHubチェック登録なし。main同期後の全40テスト成功。
+- Notion検証TODOを完了・完了条件確認済みに変更。次はコンビニ・給水地点表示をIssue化する。
+- このマージ後記録はローカル未コミット。次の作業ブランチへ引き継ぐ。
+
+## 2026-09-23 Issue #19 コンビニ・給水地点表示を実装
+
+- [Issue #19](https://github.com/momo27182/KAGE-MICHI/issues/19)を作成し、`codex/issue-19-local-spots`で着手。Notion TODOを進行中へ更新した。
+- 加工済み`spots.gpkg`を確認。39件はすべてコンビニで、給水地点は0件、`amenity`列は存在しない。Point 26件・Polygon 13件を確認した。
+- 種別・名称・緯度経度へ正規化する施設表示モデルを追加。名称欠損、分類列欠損、0件、Point/Polygonを安全に処理する。
+- コンビニ（紫）と給水地点（青緑）の地図マーカー、種別ごとの表示切替、件数、OSM出典、取得処理日時、登録・営業状況に関する制約を追加した。
+- 施設専用読込は`spots.gpkg`だけをチェックサム・CRS検証して読む。表示切替では道路グラフ・建物読込、OSM取得、影計算、経路探索を行わない。
+- 全43テスト（14.603秒）、compileall、`git diff --check`成功。実ブラウザーでコンビニ39件の紫マーカー表示と、切替による非表示・再表示を確認した。
+- 変更は未コミット・未プッシュ。次はNotionを実装完了へ更新し、ユーザー依頼後にコミット・プッシュ・`Closes #19`付きPR作成へ進む。
+
+## 2026-09-23 Issue #19のDraft PRを作成
+
+- 差分を最終レビューし、全43テスト（13.260秒）、compileall、`git diff --check`の成功を再確認。
+- 実装と記録を`736400a`（コンビニと給水地点を地図表示する）としてコミットし、`codex/issue-19-local-spots`へプッシュ。
+- [Draft PR #20 コンビニ・給水地点をローカルデータから表示する](https://github.com/momo27182/KAGE-MICHI/pull/20)を作成。本文に`Closes #19`を記載した。
+- 次はPR #20の差分・GitHub状態を確認し、問題がなければReady化・squash mergeする。

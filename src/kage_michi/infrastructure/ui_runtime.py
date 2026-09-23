@@ -14,10 +14,12 @@ from ..geocoding import PlaceSearchOutcome, SearchArea, search_places
 from ..models import GeoPoint, RouteResult
 from ..shadows import ShadowResult
 from .nominatim_geocoder import NominatimPlaceGeocoder
+from .facilities import FacilityMarker, prepare_facility_markers
 from .osm_prepared import (
     MANIFEST_FILE,
     PreparedDatasetManifest,
     load_prepared_dataset,
+    load_prepared_spots,
     validate_dataset_scope,
 )
 from .shade_route_planner import MidpointShadeRoutePlanner
@@ -71,6 +73,14 @@ def search_places_cached(
 def load_dataset_cached(data_directory: str, data_version: str) -> SpatialDataset:
     del data_version
     return load_prepared_dataset(Path(data_directory))
+
+
+@st.cache_data(show_spinner="周辺施設を読み込んでいます…")
+def load_facilities_cached(
+    data_directory: str, data_version: str
+) -> tuple[FacilityMarker, ...]:
+    del data_version
+    return prepare_facility_markers(load_prepared_spots(data_directory))
 
 
 @st.cache_data(show_spinner="指定時刻の影を計算しています…")

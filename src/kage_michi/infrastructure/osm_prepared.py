@@ -190,6 +190,31 @@ def load_prepared_dataset(directory: str | Path) -> SpatialDataset:
     )
 
 
+def load_prepared_spots(directory: str | Path) -> gpd.GeoDataFrame:
+    """Load and verify only the local facilities file.
+
+    Keeping this separate from ``load_prepared_dataset`` avoids reading the road
+    graph and buildings merely to draw optional facility markers.
+    """
+    root = Path(directory)
+    manifest_path = root / MANIFEST_FILE
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"prepared manifest not found: {manifest_path}")
+    manifest = PreparedDatasetManifest.from_json(manifest_path)
+    filename = manifest.files.get("spots")
+    if not filename:
+        raise ValueError("prepared manifest does not define a spots file")
+    spots_path = root / filename
+    if not spots_path.is_file():
+        raise FileNotFoundError(f"prepared spots file missing: {spots_path}")
+    if manifest.sha256.get("spots") != _sha256(spots_path):
+        raise ValueError("prepared dataset checksum mismatch: spots")
+    spots = gpd.read_file(spots_path)
+    if str(spots.crs) != manifest.crs:
+        raise ValueError("prepared CRS mismatch: spots")
+    return spots
+
+
 @dataclass(frozen=True)
 class PreparedOsmDataSource:
     directory: Path

@@ -7,6 +7,7 @@ from streamlit_folium import st_folium
 from ..geocoding import SearchArea
 from ..map_selection import validate_selection
 from ..models import GeoPoint
+from .facilities import FacilityMarker
 
 
 def clear_candidate(remount: bool = True) -> None:
@@ -68,7 +69,12 @@ def receive_event(key: str, area: SearchArea) -> None:
         st.session_state["map_error"] = f"地点を選択できません: {error}"
 
 
-def render_picker(area: SearchArea, scope_key: tuple, coordinates=()) -> None:
+def render_picker(
+    area: SearchArea,
+    scope_key: tuple,
+    coordinates=(),
+    facilities: tuple[FacilityMarker, ...] = (),
+) -> None:
     if st.session_state.get("map_scope") != scope_key:
         clear_candidate()
         st.session_state["map_scope"] = scope_key
@@ -132,6 +138,17 @@ def render_picker(area: SearchArea, scope_key: tuple, coordinates=()) -> None:
                       icon=folium.Icon(color="orange")).add_to(features)
     if len(coordinates) >= 2:
         folium.PolyLine(coordinates, color="#167d4a", weight=7).add_to(features)
+    facility_styles = {
+        "convenience": ("コンビニ", "#7b1fa2"),
+        "drinking_water": ("給水地点", "#00838f"),
+    }
+    for facility in facilities:
+        label, color = facility_styles[facility.kind]
+        folium.CircleMarker(
+            [facility.latitude, facility.longitude], radius=6,
+            color="white", weight=2, fill=True, fill_color=color,
+            fill_opacity=0.95, tooltip=f"{label}: {facility.name}",
+        ).add_to(features)
     key = f"map_picker_{st.session_state['map_generation']}"
     # Freeze the controlled view for this component generation. Feeding each pan
     # back as a changed prop can trigger setView and undo the user's movement.
