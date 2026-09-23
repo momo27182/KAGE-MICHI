@@ -73,6 +73,7 @@ def render_picker(
     area: SearchArea,
     scope_key: tuple,
     coordinates=(),
+    shortest_coordinates=(),
     facilities: tuple[FacilityMarker, ...] = (),
 ) -> None:
     if st.session_state.get("map_scope") != scope_key:
@@ -138,6 +139,13 @@ def render_picker(
                       icon=folium.Icon(color="orange")).add_to(features)
     if len(coordinates) >= 2:
         folium.PolyLine(coordinates, color="#167d4a", weight=7).add_to(features)
+    if len(shortest_coordinates) >= 2:
+        folium.PolyLine(
+            shortest_coordinates,
+            color="#d32f2f",
+            weight=4,
+            dash_array="8, 8",
+        ).add_to(features)
     facility_styles = {
         "convenience": ("コンビニ", "#7b1fa2"),
         "drinking_water": ("給水地点", "#00838f"),

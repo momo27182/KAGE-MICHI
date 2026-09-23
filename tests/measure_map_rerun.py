@@ -23,7 +23,7 @@ def main():
         raise SystemExit("Prepare the Wakayama dataset first.")
     with patch("kage_michi.infrastructure.ui_runtime.load_dataset_cached") as load, \
          patch("kage_michi.infrastructure.ui_runtime.calculate_shadows_cached") as shadows, \
-         patch("kage_michi.infrastructure.ui_runtime.calculate_route_cached") as route:
+         patch("kage_michi.infrastructure.ui_runtime.calculate_route_comparison_cached") as route:
         app = AppTest.from_file(str(ROOT / "src/streamlit_app.py")).run(timeout=30)
         samples = []
         for index in range(5):

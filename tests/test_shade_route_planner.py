@@ -51,6 +51,28 @@ class MidpointShadeRoutePlannerTests(unittest.TestCase):
         self.assertEqual(result.sunny_distance_m, 0.0)
         self.assertEqual(result.shade_ratio_pct, 100.0)
 
+    def test_compares_shortest_and_shade_routes_from_one_classification(self) -> None:
+        comparison = MidpointShadeRoutePlanner(sun_penalty=10).compare_routes(
+            make_dataset(), self.start, self.destination, make_shadows()
+        )
+
+        self.assertEqual(comparison.shortest.node_ids, (1, 3))
+        self.assertEqual(comparison.shortest.distance_m, 10.0)
+        self.assertEqual(comparison.shortest.sunny_distance_m, 10.0)
+        self.assertEqual(comparison.shade_optimized.node_ids, (1, 2, 3))
+        self.assertEqual(comparison.distance_increase_m, 2.0)
+        self.assertEqual(comparison.shade_improvement_points, 100.0)
+        self.assertEqual(comparison.walk_time_increase_minutes, 0)
+
+    def test_comparison_allows_both_choices_to_be_the_same_route(self) -> None:
+        comparison = MidpointShadeRoutePlanner(sun_penalty=1).compare_routes(
+            make_dataset(), self.start, self.destination, make_shadows()
+        )
+
+        self.assertEqual(comparison.shortest, comparison.shade_optimized)
+        self.assertEqual(comparison.distance_increase_m, 0.0)
+        self.assertEqual(comparison.shade_improvement_points, 0.0)
+
     def test_no_connected_route_raises_domain_error(self) -> None:
         with self.assertRaisesRegex(RouteNotFoundError, "no walking route"):
             MidpointShadeRoutePlanner().find_route(

@@ -86,7 +86,7 @@ class MapScreenTests(unittest.TestCase):
                    )), \
              patch("kage_michi.infrastructure.ui_runtime.load_dataset_cached") as load, \
              patch("kage_michi.infrastructure.ui_runtime.calculate_shadows_cached") as shadows, \
-             patch("kage_michi.infrastructure.ui_runtime.calculate_route_cached") as route, \
+             patch("kage_michi.infrastructure.ui_runtime.calculate_route_comparison_cached") as route, \
              patch("kage_michi.infrastructure.ui_runtime.load_facilities_cached",
                    return_value=(
                        FacilityMarker("convenience", "店舗", 34.231, 135.192),
@@ -160,11 +160,14 @@ class MapScreenTests(unittest.TestCase):
         app.date_input[0].set_value(date(2025, 8, 1)).run()
         next(b for b in app.button if b.label == "経路を計算").click().run(timeout=60)
         self.assertFalse(app.exception)
-        self.assertTrue(any(m.label == "経路距離" for m in app.metric))
+        self.assertTrue(any(m.label == "距離増加" for m in app.metric))
+        self.assertTrue(any("最短ルート" in item.value and "日陰優先ルート" in item.value
+                            for item in app.markdown))
+        self.assertTrue(any("地図凡例" in item.value for item in app.caption))
         with patch("kage_michi.infrastructure.ui_runtime.calculate_shadows_cached") as shadows, \
-             patch("kage_michi.infrastructure.ui_runtime.calculate_route_cached") as route:
+             patch("kage_michi.infrastructure.ui_runtime.calculate_route_comparison_cached") as route:
             app.run()
-            self.assertTrue(any(m.label == "経路距離" for m in app.metric))
+            self.assertTrue(any(m.label == "距離増加" for m in app.metric))
             app.number_input(key="start_latitude").set_value(34.231).run()
             self.assertFalse(app.exception)
             self.assertFalse(app.metric)
