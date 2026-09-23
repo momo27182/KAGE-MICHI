@@ -9,7 +9,7 @@ Phase 2後半「UI機能の段階統合」。Issue #19のコンビニ・給水�
 - ブランチ: `codex/issue-19-local-spots`。基準はmainの`dffb817`。前回の未コミット記録を保持して着手。
 - [PR #16](https://github.com/momo27182/KAGE-MICHI/pull/16)はReady化・squash merge済み。[Issue #15](https://github.com/momo27182/KAGE-MICHI/issues/15)は自動クローズ。
 - [PR #18](https://github.com/momo27182/KAGE-MICHI/pull/18)はReady化・squash merge済み。mainコミット`dffb817`。[Issue #17](https://github.com/momo27182/KAGE-MICHI/issues/17)は自動クローズ。
-- [Issue #19](https://github.com/momo27182/KAGE-MICHI/issues/19)を作成し、Notion TODOを進行中へ更新。
+- [Issue #19](https://github.com/momo27182/KAGE-MICHI/issues/19)の実装を[Draft PR #20](https://github.com/momo27182/KAGE-MICHI/pull/20)へプッシュ済み。本文に`Closes #19`を記載。
 - 記録更新はこの作業ブランチで管理し、mainへ直接プッシュしない。
 
 ## Issue #19の成果・確認
@@ -24,9 +24,9 @@ Phase 2後半「UI機能の段階統合」。Issue #19のコンビニ・給水�
 
 ユーザー承認のもとCodex sandbox状態を修復し、実ブラウザー検証を再開。全境界操作、視点保持、経路保持・失効を確認。視点復帰不具合と確定ピンのクリック遮断を修正。灰色背景は地図iframe再作成時のタイル再取得が原因で、確定時は再作成しないよう改善。最終クリック応答5回は883〜1,148ms、中央値972ms。取消時のタイル再表示5回は中央値458ms、最大3,124ms。確定時は535msでタイル9枚を維持し灰色背景なし。全40テスト、構文確認、差分チェック成功。詳細はdocs/map-selection.md。
 
-1. Issue #19の記録とNotion TODOを完了状態へ更新する。
-2. ユーザー依頼後にコミット・プッシュし、`Closes #19`付きPull Requestを作成する。
-3. PR差分をレビュー後、問題がなければReady化・squash mergeする。
+1. PR #20の差分とGitHub状態を確認する。
+2. 問題がなければReady化・squash mergeする。
+3. マージ後にIssue #19とNotion TODOを完了へ更新する。
 
 ブラウザー操作は復旧済み。一時フォルダの読み取り対象がCodexSandboxUsersへ広がるリスクはユーザーへ説明済みで、書き込み権限は付与していない。基本動作確認やDOM表示時間は、網羅的な実画面検証や描画時間の代用ではない。
 
@@ -46,4 +46,4 @@ Phase 2後半「UI機能の段階統合」。Issue #19のコンビニ・給水�
 - [検証TODO](https://app.notion.com/p/3d0e0745b52581ce8511e683b3ad22b2)
 - [進捗記録](https://app.notion.com/p/3b7e0745b525815b99b0ce64d1a1239b)
 
-> AGENT.md、docs/CURRENT_STATUS.md、Notion最新進捗を読んでください。Issue #19の施設表示はローカル実装・検証済みです。次はユーザー依頼に応じてコミット・プッシュし、Closes #19付きPRを作成してください。
+> AGENT.md、docs/CURRENT_STATUS.md、Notion最新進捗を読んでください。Issue #19の変更はDraft PR #20へプッシュ済みです。次は差分とGitHub状態を確認し、問題がなければReady化・squash mergeしてください。
