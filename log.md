@@ -591,3 +591,10 @@ Issue #9の差分と画面を最終確認し、コミット・プッシュ、`Cl
 - 和歌山駅の3次メッシュ候補を`51352175`と算出。半径1.7kmは隣接メッシュ、索引図、GML Envelopeで確定する方針。
 - ライセンス・出典表示、CRS・高さ、取得更新、Git除外、次の前処理入出力と検証条件を`docs/plateau-data-research.md`へ記録し、`data/README.md`へ配置方針を追記。
 - 調査はローカル完了。変更は未コミット・未プッシュで、NotionはGitHub統合前のため進行中を維持。
+
+## 2026-09-23 Issue #23のDraft PRを作成
+
+- 差分を最終レビューし、全45テスト、compileall、`git diff --check`、秘密情報パターン確認に成功。
+- 調査と記録を`1a9b3dd`（PLATEAUデータと利用条件を調査する）としてコミットし、`codex/issue-23-plateau-research`へプッシュ。
+- [Draft PR #24 PLATEAUデータと利用条件を調査する](https://github.com/momo27182/KAGE-MICHI/pull/24)を作成。本文に`Closes #23`を記載した。
+- 次はPR #24の差分・GitHub状態を確認し、問題がなければReady化・squash mergeする。GitHub統合前のためNotion TODOは進行中を維持。

@@ -7,7 +7,7 @@
 Phase 2後半は完了。Phase 3「PLATEAU小範囲検証」の最初の調査をローカルで完了した。
 
 - ブランチ: `codex/issue-23-plateau-research`（`origin/main`の`cee2924`から作成）。
-- [Issue #23](https://github.com/momo27182/KAGE-MICHI/issues/23)「PLATEAUデータと利用条件を調査する」は進行中。調査文書は完成、未コミット・未プッシュ。
+- [Issue #23](https://github.com/momo27182/KAGE-MICHI/issues/23)「PLATEAUデータと利用条件を調査する」は進行中。[Draft PR #24](https://github.com/momo27182/KAGE-MICHI/pull/24)を作成済み。
 - [PR #16](https://github.com/momo27182/KAGE-MICHI/pull/16)はReady化・squash merge済み。[Issue #15](https://github.com/momo27182/KAGE-MICHI/issues/15)は自動クローズ。
 - [PR #18](https://github.com/momo27182/KAGE-MICHI/pull/18)はReady化・squash merge済み。mainコミット`dffb817`。[Issue #17](https://github.com/momo27182/KAGE-MICHI/issues/17)は自動クローズ。
 - [PR #20](https://github.com/momo27182/KAGE-MICHI/pull/20)はReady化・squash merge済み。mainコミット`c7a2dcd`。[Issue #19](https://github.com/momo27182/KAGE-MICHI/issues/19)は自動クローズ。
@@ -23,9 +23,9 @@ Phase 2後半は完了。Phase 3「PLATEAU小範囲検証」の最初の調査�
 
 ## 残る制約・次の3項目
 
-1. Issue #23の差分を確認し、コミット・プッシュ・`Closes #23`付きPull Requestを作成する。
-2. レビュー・マージ後、「PLATEAU建物の前処理パイプラインを作る」をIssue化する。
-3. まず1メッシュで取得・解析・CRS変換・高さ欠損率・処理時間を検証する。
+1. PR #24の差分とGitHub状態を確認する。
+2. 問題がなければReady化・squash mergeする。
+3. マージ後、「PLATEAU建物の前処理パイプラインを作る」をIssue化する。
 
 ブラウザー操作は復旧済み。一時フォルダの読み取り対象がCodexSandboxUsersへ広がるリスクはユーザーへ説明済みで、書き込み権限は付与していない。基本動作確認やDOM表示時間は、網羅的な実画面検証や描画時間の代用ではない。
 
@@ -45,4 +45,4 @@ Phase 2後半は完了。Phase 3「PLATEAU小範囲検証」の最初の調査�
 - [検証TODO](https://app.notion.com/p/3d0e0745b52581ce8511e683b3ad22b2)
 - [進捗記録](https://app.notion.com/p/3b7e0745b525815b99b0ce64d1a1239b)
 
-> AGENT.md、docs/CURRENT_STATUS.md、Notion最新進捗を読んでください。Issue #23のPLATEAU調査はローカル完了・未コミットです。差分を確認し、コミット・プッシュ・Closes #23付きPull Requestを作成してください。
+> AGENT.md、docs/CURRENT_STATUS.md、Notion最新進捗を読んでください。Issue #23の変更はDraft PR #24へプッシュ済みです。差分とGitHub状態を確認し、問題がなければReady化・squash mergeしてください。
