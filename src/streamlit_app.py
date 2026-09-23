@@ -15,7 +15,7 @@ from kage_michi.infrastructure.osm_prepared import PreparedDatasetManifest
 from kage_michi.map_selection import validate_selection
 
 from kage_michi.infrastructure.ui_runtime import (
-    calculate_route_cached,
+    calculate_route_comparison_cached,
     calculate_shadows_cached,
     load_facilities_cached,
     load_dataset_cached,
@@ -48,6 +48,18 @@ def _show_search_message(outcome: PlaceSearchOutcome) -> None:
         st.info(outcome.message)
     else:
         st.success(outcome.message)
+
+
+def _route_coordinates(graph, node_ids: tuple[int, ...]) -> tuple[tuple[float, float], ...]:
+    transformer = Transformer.from_crs(
+        graph.graph["crs"], "EPSG:4326", always_xy=True
+    )
+    coordinates = []
+    for node_id in node_ids:
+        node = graph.nodes[node_id]
+        longitude, latitude = transformer.transform(node["x"], node["y"])
+        coordinates.append((latitude, longitude))
+    return tuple(coordinates)
 
 
 def _render_place_search(
@@ -198,7 +210,7 @@ if calculate and area is not None:
         shadows = calculate_shadows_cached(
             keys.dataset[0], keys.dataset[1], departure.isoformat()
         )
-        route = calculate_route_cached(
+        comparison = calculate_route_comparison_cached(
             keys.dataset[0],
             keys.dataset[1],
             departure.isoformat(),
@@ -210,34 +222,73 @@ if calculate and area is not None:
         )
         total_seconds = perf_counter() - request_started
         disclosure = build_disclosure(
-            dataset, shadows.result, route.result, departure, route.calculated_at
+            dataset,
+            shadows.result,
+            comparison.result.shade_optimized,
+            departure,
+            comparison.calculated_at,
+        )
+        shortest_disclosure = build_disclosure(
+            dataset,
+            shadows.result,
+            comparison.result.shortest,
+            departure,
+            comparison.calculated_at,
         )
 
         graph = dataset.payload.graph
-        transformer = Transformer.from_crs(
-            graph.graph["crs"], "EPSG:4326", always_xy=True
+        route_coordinates = _route_coordinates(
+            graph, comparison.result.shade_optimized.node_ids
         )
-        route_coordinates = []
-        for node_id in route.result.node_ids:
-            node = graph.nodes[node_id]
-            longitude, latitude = transformer.transform(node["x"], node["y"])
-            route_coordinates.append((latitude, longitude))
+        shortest_coordinates = _route_coordinates(
+            graph, comparison.result.shortest.node_ids
+        )
         st.session_state["route_snapshot"] = (
-            current_signature, disclosure, route_coordinates, total_seconds,
-            shadows.elapsed_seconds, route.elapsed_seconds,
+            current_signature,
+            disclosure,
+            shortest_disclosure,
+            comparison.result,
+            route_coordinates,
+            shortest_coordinates,
+            total_seconds,
+            shadows.elapsed_seconds,
+            comparison.elapsed_seconds,
         )
     except (OSError, ValueError, RouteNotFoundError) as error:
         st.error(str(error))
 
 snapshot = st.session_state.get("route_snapshot")
 coordinates = ()
+shortest_coordinates = ()
 if snapshot and snapshot[0] == current_signature:
-    _, disclosure, coordinates, total_seconds, shadow_seconds, route_seconds = snapshot
+    (
+        _, disclosure, shortest_disclosure, comparison, coordinates,
+        shortest_coordinates, total_seconds, shadow_seconds, route_seconds,
+    ) = snapshot
+    st.subheader("ルート比較")
+    st.markdown(
+        "| 指標 | 最短ルート | 日陰優先ルート |\n"
+        "|---|---:|---:|\n"
+        f"| 距離 | {shortest_disclosure.route_distance_m:,.0f} m | "
+        f"{disclosure.route_distance_m:,.0f} m |\n"
+        f"| 推定徒歩時間 | {comparison.shortest.estimated_walk_minutes} 分 | "
+        f"{comparison.shade_optimized.estimated_walk_minutes} 分 |\n"
+        f"| 推定日向距離 | {shortest_disclosure.sunny_distance_m:,.0f} m | "
+        f"{disclosure.sunny_distance_m:,.0f} m |\n"
+        f"| 推定日陰率 | {shortest_disclosure.shade_ratio_pct:.1f}% | "
+        f"{disclosure.shade_ratio_pct:.1f}% |"
+    )
     first, second, third = st.columns(3)
-    first.metric("経路距離", f"{disclosure.route_distance_m:,.0f} m")
-    second.metric("推定日陰率", f"{disclosure.shade_ratio_pct:.1f}%")
+    first.metric("距離増加", f"{comparison.distance_increase_m:+,.0f} m")
+    second.metric(
+        "日陰率の差",
+        f"{comparison.shade_improvement_points:+.1f} ポイント",
+    )
     third.metric("前回の計算処理", f"{total_seconds:.3f} 秒")
-    st.write(f"推定日向距離: {disclosure.sunny_distance_m:,.0f} m")
+    st.caption(
+        "地図凡例: 緑の実線＝日陰優先ルート / 赤の破線＝最短ルート。"
+        "推定徒歩時間は80m/分で算出しています。差が0の場合は同一ルートです。"
+    )
     with st.expander("計算根拠・時刻・データ情報", expanded=True):
         st.write(f"対象日時: `{disclosure.departure_iso}`")
         st.write(f"計算実行時刻: `{disclosure.calculated_at_iso}`")
@@ -279,5 +330,9 @@ if area is not None:
     except (OSError, ValueError) as error:
         st.warning(f"周辺施設を読み込めません: {error}")
     render_picker(
-        area, (str(dataset_path), data_version), coordinates, facilities
+        area,
+        (str(dataset_path), data_version),
+        coordinates,
+        shortest_coordinates,
+        facilities,
     )

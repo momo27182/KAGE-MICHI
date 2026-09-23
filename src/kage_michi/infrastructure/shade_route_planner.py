@@ -11,7 +11,7 @@ from shapely.geometry import Point
 from shapely.prepared import prep
 
 from ..data import SpatialDataset
-from ..models import GeoPoint, RouteResult
+from ..models import GeoPoint, RouteComparison, RouteResult
 from ..routing import RouteNotFoundError
 from ..shadows import ShadowResult
 
@@ -31,6 +31,36 @@ class MidpointShadeRoutePlanner:
         destination: GeoPoint,
         shadows: ShadowResult,
     ) -> RouteResult:
+        graph, origin, target = self._prepare_graph(
+            dataset, start, destination, shadows
+        )
+        return self._route_result(graph, origin, target, "shade_cost")
+
+    def compare_routes(
+        self,
+        dataset: SpatialDataset,
+        start: GeoPoint,
+        destination: GeoPoint,
+        shadows: ShadowResult,
+    ) -> RouteComparison:
+        """Calculate both routes after classifying every edge only once."""
+        graph, origin, target = self._prepare_graph(
+            dataset, start, destination, shadows
+        )
+        return RouteComparison(
+            shortest=self._route_result(graph, origin, target, "length"),
+            shade_optimized=self._route_result(
+                graph, origin, target, "shade_cost"
+            ),
+        )
+
+    def _prepare_graph(
+        self,
+        dataset: SpatialDataset,
+        start: GeoPoint,
+        destination: GeoPoint,
+        shadows: ShadowResult,
+    ) -> tuple[nx.MultiDiGraph, int, int]:
         graph = dataset.payload.graph.copy()
         crs = graph.graph.get("crs")
         if crs is None:
@@ -66,8 +96,14 @@ class MidpointShadeRoutePlanner:
             edge["is_shaded"] = is_shaded
             edge["shade_cost"] = length if is_shaded else length * self.sun_penalty
 
+        return graph, int(origin), int(target)
+
+    @staticmethod
+    def _route_result(
+        graph: nx.MultiDiGraph, origin: int, target: int, weight: str
+    ) -> RouteResult:
         try:
-            route = nx.shortest_path(graph, origin, target, weight="shade_cost")
+            route = nx.shortest_path(graph, origin, target, weight=weight)
         except (nx.NetworkXNoPath, nx.NodeNotFound) as error:
             raise RouteNotFoundError("no walking route connects the requested points") from error
         if len(route) < 2:
@@ -78,7 +114,7 @@ class MidpointShadeRoutePlanner:
         for u, v in zip(route[:-1], route[1:]):
             edge = min(
                 graph[u][v].values(),
-                key=lambda value: float(value["shade_cost"]),
+                key=lambda value: float(value[weight]),
             )
             length = float(edge["length"])
             total_distance += length

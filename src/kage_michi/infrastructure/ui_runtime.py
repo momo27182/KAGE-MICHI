@@ -11,7 +11,7 @@ import streamlit as st
 
 from ..data import SpatialDataset
 from ..geocoding import PlaceSearchOutcome, SearchArea, search_places
-from ..models import GeoPoint, RouteResult
+from ..models import GeoPoint, RouteComparison, RouteResult
 from ..shadows import ShadowResult
 from .nominatim_geocoder import NominatimPlaceGeocoder
 from .facilities import FacilityMarker, prepare_facility_markers
@@ -36,6 +36,13 @@ class TimedShadows:
 @dataclass(frozen=True)
 class TimedRoute:
     result: RouteResult
+    elapsed_seconds: float
+    calculated_at: datetime
+
+
+@dataclass(frozen=True)
+class TimedRouteComparison:
+    result: RouteComparison
     elapsed_seconds: float
     calculated_at: datetime
 
@@ -120,3 +127,28 @@ def calculate_route_cached(
         dataset, start, destination, shadows.result
     )
     return TimedRoute(result, perf_counter() - started, datetime.now(timezone.utc))
+
+
+@st.cache_data(show_spinner="最短ルートと日陰優先ルートを探索しています…")
+def calculate_route_comparison_cached(
+    data_directory: str,
+    data_version: str,
+    departure_iso: str,
+    start_latitude: float,
+    start_longitude: float,
+    destination_latitude: float,
+    destination_longitude: float,
+    sun_penalty: float,
+) -> TimedRouteComparison:
+    dataset = load_dataset_cached(data_directory, data_version)
+    start = GeoPoint(start_latitude, start_longitude)
+    destination = GeoPoint(destination_latitude, destination_longitude)
+    validate_dataset_scope(dataset, start, destination)
+    shadows = calculate_shadows_cached(data_directory, data_version, departure_iso)
+    started = perf_counter()
+    result = MidpointShadeRoutePlanner(sun_penalty).compare_routes(
+        dataset, start, destination, shadows.result
+    )
+    return TimedRouteComparison(
+        result, perf_counter() - started, datetime.now(timezone.utc)
+    )
