@@ -4,9 +4,10 @@
 
 ## 現在のPhase・GitHub
 
-Phase 3「PLATEAU小範囲検証」の[Issue #25](https://github.com/momo27182/KAGE-MICHI/issues/25)を実装済み。GitHub統合前の最終検証段階。
+Phase 3「PLATEAU小範囲検証」の[Issue #25](https://github.com/momo27182/KAGE-MICHI/issues/25)を実装済み。[Draft PR #26](https://github.com/momo27182/KAGE-MICHI/pull/26)でレビュー待ち。
 
 - ブランチ: `codex/issue-25-plateau-preprocessing`
+- 実装コミット: `9c8f481`。PR本文に`Closes #25`を記載。
 - CityGML前処理、検証付きローカル読込、CLI、自動テスト、運用手順を追加。
 - 約940MBの原本と生成GeoPackageはGit対象外。アプリ実行時に外部取得やCityGML解析を行わない。
 
@@ -21,9 +22,9 @@ Phase 3「PLATEAU小範囲検証」の[Issue #25](https://github.com/momo27182/K
 
 ブロッカーなし。
 
-1. ユーザー確認後、コミット・プッシュする。
-2. `Closes #25`付きDraft PRを作成する。
-3. PRを最終レビュー後、Ready化・squash mergeする。
+1. PR #26の差分・GitHub状態を最終レビューする。
+2. 問題がなければReady化・squash mergeする。
+3. マージ後、Notion TODOを完了へ変更し、次のPLATEAU比較タスクをIssue化する。
 
 ## 維持する判断
 

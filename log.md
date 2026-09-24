@@ -622,3 +622,10 @@ Issue #9の差分と画面を最終確認し、コミット・プッシュ、`Cl
 - manifestに出典URL、ETag、取得日時、容量、入出力SHA-256、意味チェックサム、CRS、件数、欠損、所要時間、ピークメモリを記録。読込時に再検証する。
 - 1メッシュ・100mは19棟、62.32秒、ピーク123.6MiB、出力104KiB。半径1.7km・16メッシュは23,032棟、2,645.83秒、ピーク165.5MiB、出力7.22MiB。どちらも高さ欠損0。
 - PLATEAU専用6テストで、メッシュ選択、CRS・高さ抽出、高さ欠損保持、境界重複除去、再現性、改ざん検知、CRS欠落・XML破損の拒否を確認。全テスト、compileall、差分チェックに成功し、Notionにも反映済み。
+
+## 2026-09-24 Issue #25のDraft PRを作成
+
+- 実装・テスト・記録を`9c8f481`（PLATEAU建物の前処理基盤を追加する）としてコミットし、`codex/issue-25-plateau-preprocessing`へプッシュ。
+- [Draft PR #26 PLATEAU建物の前処理パイプラインを追加する](https://github.com/momo27182/KAGE-MICHI/pull/26)を作成し、本文に`Closes #25`を記載。
+- 約940MBのCityGML原本と生成GeoPackageはGit対象外のままであることを確認。全51テスト、compileall、差分チェック成功済み。
+- 次はPR #26の差分とGitHub状態を最終レビューし、問題がなければReady化・squash mergeする。
