@@ -598,3 +598,27 @@ Issue #9の差分と画面を最終確認し、コミット・プッシュ、`Cl
 - 調査と記録を`1a9b3dd`（PLATEAUデータと利用条件を調査する）としてコミットし、`codex/issue-23-plateau-research`へプッシュ。
 - [Draft PR #24 PLATEAUデータと利用条件を調査する](https://github.com/momo27182/KAGE-MICHI/pull/24)を作成。本文に`Closes #23`を記載した。
 - 次はPR #24の差分・GitHub状態を確認し、問題がなければReady化・squash mergeする。GitHub統合前のためNotion TODOは進行中を維持。
+
+## 2026-09-23 PR #24をsquash merge
+
+- PR #24の全6ファイルをレビュー。Markdown末尾空白1件を`51f2739`で修正後、GitHubは`CLEAN`・`MERGEABLE`、必須チェックなし、`Closes #23`記載済みを確認。
+- 全45テスト（レビュー時12.302秒、統合後11.624秒）、compileall、差分チェックに成功し、修正が必要な問題なしと判断。
+- PR #24をReady化してsquash merge。mainコミット`bb7fb7e`。Issue #23は自動クローズ。
+- ローカルmainをorigin/mainへfast-forward同期。Notion TODOを完了・完了条件確認済みへ更新する。
+- 次はPhase 3「PLATEAU建物の前処理パイプラインを作る」をIssue化する。このマージ後記録はローカル未コミットで次の作業ブランチへ引き継ぐ。
+
+## 2026-09-24 Issue #25を作成
+
+- [Issue #25 PLATEAU建物の前処理パイプラインを作る](https://github.com/momo27182/KAGE-MICHI/issues/25)を作成。
+- 1メッシュから開始し、半径1.7kmへ段階拡大する。CRS検証、高さ欠損保持、境界重複防止、再現可能なmanifest、処理時間・ピークメモリ・容量計測を完了条件に設定。
+- 約940MBのCityGML原本と加工成果物はGit対象外。アプリ実行時は外部取得・CityGML解析をせず、加工済みデータだけを読む。
+- 今回はIssue化のみで、Notion TODOは未着手を維持。次はIssue #25用ブランチを作成して着手する。
+
+## 2026-09-24 Issue #25 PLATEAU建物前処理を実装
+
+- `codex/issue-25-plateau-preprocessing`を作成し、Notion TODOを進行中へ更新。公式CityGML ZIP 939,693,415 bytesをGit対象外の`data/raw/plateau/`へ取得した。
+- 対象メッシュのCityGMLだけを逐次解析し、LOD1底面、底面・上面Z、高さ、`measuredHeight`、`lod1HeightType`、LOD2有無をGeoPackageに出力するCLIを追加。
+- `EPSG:6697`の軸順を検証し`EPSG:6676`へ変換。同一建物IDの重複除去と半径円の交差判定を実施。高さ不明時は10mで補完せず欠損を保持する。
+- manifestに出典URL、ETag、取得日時、容量、入出力SHA-256、意味チェックサム、CRS、件数、欠損、所要時間、ピークメモリを記録。読込時に再検証する。
+- 1メッシュ・100mは19棟、62.32秒、ピーク123.6MiB、出力104KiB。半径1.7km・16メッシュは23,032棟、2,645.83秒、ピーク165.5MiB、出力7.22MiB。どちらも高さ欠損0。
+- PLATEAU専用6テストで、メッシュ選択、CRS・高さ抽出、高さ欠損保持、境界重複除去、再現性、改ざん検知、CRS欠落・XML破損の拒否を確認。全テスト、compileall、差分チェックに成功し、Notionにも反映済み。
