@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "config": {"center": {"latitude": 34.2325, "longitude": 135.1917}, "radius_m": 1700, "departure": "2026-08-11T14:00:00+09:00", "projected_crs": "EPSG:6676"},
+  "buildings": {
+    "osm": {"count": 6052, "height_median_m": 10.0, "height_p10_m": 7.9, "height_p90_m": 10.0, "default_value_count_upper_bound": 5387, "default_value_pct_upper_bound": 89.012},
+    "plateau": {"count": 23032, "height_median_m": 6.879, "height_p10_m": 3.733, "height_p90_m": 9.948, "height_missing_count": 0}
+  },
+  "footprints": {"osm_area_m2": 923043.633, "plateau_area_m2": 2281970.956, "shared_area_m2": 735429.966, "intersection_over_union": 0.297795, "osm_covered_by_plateau_pct": 79.674, "plateau_covered_by_osm_pct": 32.228},
+  "shadows": {"solar_altitude_deg": 57.841128, "solar_azimuth_deg": 241.060895, "osm_area_m2": 1384220.703, "plateau_area_m2": 3488122.74, "shared_area_m2": 1163785.754, "intersection_over_union": 0.313811, "osm_covered_by_plateau_pct": 84.075, "plateau_covered_by_osm_pct": 33.364},
+  "performance_seconds": {"geometry_comparison": 6.706784, "osm_shadow": 1.676318, "plateau_shadow": 9.11996, "total": 22.287387},
+  "decision": "Adopt PLATEAU as the target building source for shadows only after adding time-keyed caching or offline precomputation; do not replace the current UI source in this issue."
+}

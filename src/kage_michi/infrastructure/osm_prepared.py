@@ -215,6 +215,27 @@ def load_prepared_spots(directory: str | Path) -> gpd.GeoDataFrame:
     return spots
 
 
+def load_prepared_buildings(directory: str | Path) -> tuple[gpd.GeoDataFrame, PreparedDatasetManifest]:
+    """Load and verify only the local OSM building artifact."""
+    root = Path(directory)
+    manifest_path = root / MANIFEST_FILE
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"prepared manifest not found: {manifest_path}")
+    manifest = PreparedDatasetManifest.from_json(manifest_path)
+    filename = manifest.files.get("buildings")
+    if not filename:
+        raise ValueError("prepared manifest does not define a buildings file")
+    buildings_path = root / filename
+    if not buildings_path.is_file():
+        raise FileNotFoundError(f"prepared buildings file missing: {buildings_path}")
+    if manifest.sha256.get("buildings") != _sha256(buildings_path):
+        raise ValueError("prepared dataset checksum mismatch: buildings")
+    buildings = gpd.read_file(buildings_path)
+    if str(buildings.crs) != manifest.crs:
+        raise ValueError("prepared CRS mismatch: buildings")
+    return buildings, manifest
+
+
 @dataclass(frozen=True)
 class PreparedOsmDataSource:
     directory: Path

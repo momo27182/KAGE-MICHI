@@ -4,10 +4,12 @@
 
 ## 現在のPhase・GitHub
 
-Phase 3「PLATEAU小範囲検証」の[Issue #25](https://github.com/momo27182/KAGE-MICHI/issues/25)を実装済み。[Draft PR #26](https://github.com/momo27182/KAGE-MICHI/pull/26)でレビュー待ち。
+Phase 3「PLATEAU小範囲検証」の[Issue #27](https://github.com/momo27182/KAGE-MICHI/issues/27)でOSMとPLATEAU LOD1の比較を実装し、[Draft PR #28](https://github.com/momo27182/KAGE-MICHI/pull/28)でレビュー待ち。
 
-- ブランチ: `codex/issue-25-plateau-preprocessing`
-- 実装コミット: `9c8f481`。PR本文に`Closes #25`を記載。
+- ブランチ: `codex/issue-27-plateau-osm-comparison`。`origin/main`の`ceb530b`から作成。
+- 実装コミット: `a4dc6d3`。PR本文に`Closes #27`を記載。
+- [PR #26](https://github.com/momo27182/KAGE-MICHI/pull/26)はReady化・squash merge済み。[Issue #25](https://github.com/momo27182/KAGE-MICHI/issues/25)は自動クローズ。
+- マージ後の記録変更は未コミットで保持し、次の作業ブランチへ引き継ぐ。
 - CityGML前処理、検証付きローカル読込、CLI、自動テスト、運用手順を追加。
 - 約940MBの原本と生成GeoPackageはGit対象外。アプリ実行時に外部取得やCityGML解析を行わない。
 
@@ -22,9 +24,9 @@ Phase 3「PLATEAU小範囲検証」の[Issue #25](https://github.com/momo27182/K
 
 ブロッカーなし。
 
-1. PR #26の差分・GitHub状態を最終レビューする。
+1. PR #28の差分とGitHub状態を最終レビューする。
 2. 問題がなければReady化・squash mergeする。
-3. マージ後、Notion TODOを完了へ変更し、次のPLATEAU比較タスクをIssue化する。
+3. マージ後、PLATEAU影のキャッシュ・事前計算設計を次タスクとして判断する。
 
 ## 維持する判断
 
