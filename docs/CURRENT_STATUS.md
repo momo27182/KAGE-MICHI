@@ -4,12 +4,13 @@
 
 ## 現在のPhase・GitHub
 
-Phase 4「道路日陰率の改善」に着手し、Issue #29のローカル実装・実測まで完了した。
+Phase 4「道路日陰率の改善」に着手し、Issue #29のDraft PRを作成した。
 
 - ブランチ: `codex/issue-29-edge-shade-ratio`
 - [Issue #29](https://github.com/momo27182/KAGE-MICHI/issues/29): 道路区間の日陰率を線分サンプリングで評価する
-- Notion TODO: 進行中。GitHubへ未統合のため完了条件確認は未チェック。
-- 前回PR #28のマージ後記録をこのブランチで保持している。
+- [Draft PR #30](https://github.com/momo27182/KAGE-MICHI/pull/30): `Closes #29`記載済み
+- 実装コミット: `fce23d8`
+- Notion TODO: レビュー待ちのため進行中。完了条件確認は未チェック。
 
 ## Issue #29の結果
 
@@ -23,8 +24,8 @@ Phase 4「道路日陰率の改善」に着手し、Issue #29のローカル実�
 
 ブロッカーなし。
 
-1. 差分、全テスト、構文、秘密情報、巨大ファイル混入を最終確認する。
-2. ユーザー依頼後にコミット・プッシュし、`Closes #29`付きDraft PRを作成する。
+1. PR #30を最終レビューする。
+2. 問題がなければReady化・squash mergeする。
 3. マージ後、5分刻みの日陰率を事前生成・保存する次Issueを作成する。
 
 ## 維持する判断
