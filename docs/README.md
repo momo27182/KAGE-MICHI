@@ -9,5 +9,7 @@
 - `plateau-data-research.md`: 和歌山市PLATEAUデータ、利用条件、取得・前処理方針の調査。
 - `edge-shade-comparison.md`: 道路日陰率の中央点・5m・10m・交差長方式の精度と性能比較。
 - `edge-shade-comparison.json`: 固定条件で再現した道路日陰率比較の小さな結果スナップショット。
+- `precomputed-shade.md`: 5分刻み道路日陰率の生成、保存、検証、夜間の意味、実測結果。
+- `precomputed-shade-benchmark.json`: 固定日24時間・288時刻の小さな実測スナップショット。
 - `decisions/`: 後から変更コストが高い技術判断と理由をADRとして保存する。
 
