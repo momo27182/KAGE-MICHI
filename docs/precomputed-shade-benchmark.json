@@ -1,0 +1,19 @@
+{
+  "measured_at": "2026-09-25",
+  "region": "center=34.2325,135.1917; radius_m=1700",
+  "date": "2026-08-11",
+  "timezone": "Asia/Tokyo",
+  "interval_minutes": 5,
+  "sample_spacing_m": 5.0,
+  "timestamps": 288,
+  "daylight_timestamps": 162,
+  "edges": 10262,
+  "samples": 120280,
+  "values": 2955456,
+  "generation_seconds": 2702.281191,
+  "peak_memory_bytes": 468815872,
+  "output_bytes": 1113068,
+  "validation_load_seconds": 0.040518,
+  "full_load_seconds_mean_of_5": 0.077192,
+  "full_load_seconds_max_of_5": 0.078679
+}

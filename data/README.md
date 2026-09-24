@@ -32,3 +32,7 @@ PLATEAUや気象データを追加するときは、入手元、取得日、対�
 
 約940MBの配布ZIPをアプリ実行時に取得・解析しません。オフライン前処理で対象メッシュを絞り、実行時は加工済みデータを読み込みます。生成コマンド、出力仕様、実測値は`docs/plateau-preprocessing.md`を参照してください。
 
+## 事前計算した道路日陰率
+
+`scripts/prepare_shade_ratios.py`は加工済みOSM道路とPLATEAU建物から、`data/prepared/shade/<地域>/<日付>/`へNPZとmanifestを生成します。成果物はGit管理対象外です。保存仕様、夜間の意味、検証方法、実測値は`docs/precomputed-shade.md`を参照してください。
+
