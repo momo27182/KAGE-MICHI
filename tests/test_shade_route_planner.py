@@ -11,7 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from kage_michi.data import SpatialDataset
-from kage_michi.infrastructure.shade_route_planner import MidpointShadeRoutePlanner
+from kage_michi.infrastructure.shade_route_planner import (
+    MidpointShadeRoutePlanner,
+    SampledShadeRoutePlanner,
+)
 from kage_michi.models import GeoPoint
 from kage_michi.routing import RouteNotFoundError
 from kage_michi.shadows import ShadowResult
@@ -91,6 +94,45 @@ class MidpointShadeRoutePlannerTests(unittest.TestCase):
         second = planner.find_route(dataset, self.start, self.destination, shadows)
 
         self.assertEqual(first, second)
+
+class SampledShadeRoutePlannerTests(unittest.TestCase):
+    start = GeoPoint(0.0, 0.0)
+    destination = GeoPoint(0.0, 0.002)
+
+    def make_dataset(self) -> SpatialDataset:
+        graph = nx.MultiDiGraph(crs="EPSG:3857")
+        graph.add_node(1, x=0.0, y=0.0)
+        graph.add_node(2, x=20.0, y=0.0)
+        graph.add_edge(1, 2, length=20.0, geometry=LineString([(0, 0), (20, 0)]))
+        return SpatialDataset(
+            SimpleNamespace(graph=graph), "test", "fixed", "unit", "EPSG:3857"
+        )
+
+    def test_partial_shade_contributes_partial_sunny_distance(self) -> None:
+        shadow = ShadowResult(
+            geometry=Polygon([(0, -1), (10, -1), (10, 1), (0, 1)]),
+            solar_altitude_deg=45.0,
+            solar_azimuth_deg=180.0,
+        )
+        planner = SampledShadeRoutePlanner(sun_penalty=10, sample_spacing_m=5)
+
+        result = planner.find_route(
+            self.make_dataset(), GeoPoint(0, 0), GeoPoint(0, 0.00018), shadow
+        )
+
+        self.assertEqual(result.distance_m, 20.0)
+        self.assertEqual(result.sunny_distance_m, 10.0)
+        self.assertEqual(result.shade_ratio_pct, 50.0)
+
+    def test_requires_projected_graph(self) -> None:
+        with self.assertRaisesRegex(ValueError, "projected CRS"):
+            SampledShadeRoutePlanner().find_route(
+                make_dataset(), self.start, self.destination, make_shadows()
+            )
+
+    def test_spacing_must_be_positive(self) -> None:
+        with self.assertRaisesRegex(ValueError, "positive"):
+            SampledShadeRoutePlanner(sample_spacing_m=0)
 
 
 if __name__ == "__main__":

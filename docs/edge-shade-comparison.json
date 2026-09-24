@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "config": {
+    "center": {"latitude": 34.2325, "longitude": 135.1917},
+    "departure": "2026-08-11T14:00:00+09:00",
+    "projected_crs": "EPSG:6676",
+    "sample_spacings_m": [5.0, 10.0]
+  },
+  "edge_count": 10262,
+  "methods": {
+    "midpoint": {
+      "seconds": 0.126414,
+      "mean_absolute_error": 0.070651,
+      "maximum_absolute_error": 0.954289,
+      "partial_shade_edge_count": 0
+    },
+    "intersection_length": {
+      "seconds": 67.467995,
+      "mean_absolute_error": 0.0,
+      "maximum_absolute_error": 0.0,
+      "partial_shade_edge_count": 2486,
+      "reference": true
+    },
+    "sample_5m": {
+      "seconds": 1.363612,
+      "mean_absolute_error": 0.009395,
+      "maximum_absolute_error": 0.249077,
+      "partial_shade_edge_count": 2226,
+      "sample_count": 120280
+    },
+    "sample_10m": {
+      "seconds": 0.782812,
+      "mean_absolute_error": 0.016072,
+      "maximum_absolute_error": 0.751022,
+      "partial_shade_edge_count": 1966,
+      "sample_count": 62634
+    }
+  },
+  "storage_estimate": {
+    "float32_bytes_per_time_slice": 41048,
+    "float32_mib_per_time_slice": 0.039146,
+    "float32_mib_for_24h_at_5min": 11.274
+  }
+}

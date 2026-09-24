@@ -7,5 +7,7 @@
 - `CURRENT_STATUS.md`: 最新状態だけを短くまとめる引き継ぎ資料。作業状況が変わるたびに上書きする。
 - `architecture.md`: 製品モジュールの責務、依存方向、段階移植の設計。
 - `plateau-data-research.md`: 和歌山市PLATEAUデータ、利用条件、取得・前処理方針の調査。
+- `edge-shade-comparison.md`: 道路日陰率の中央点・5m・10m・交差長方式の精度と性能比較。
+- `edge-shade-comparison.json`: 固定条件で再現した道路日陰率比較の小さな結果スナップショット。
 - `decisions/`: 後から変更コストが高い技術判断と理由をADRとして保存する。
 
