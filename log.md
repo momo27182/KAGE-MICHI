@@ -629,3 +629,21 @@ Issue #9の差分と画面を最終確認し、コミット・プッシュ、`Cl
 - [Draft PR #26 PLATEAU建物の前処理パイプラインを追加する](https://github.com/momo27182/KAGE-MICHI/pull/26)を作成し、本文に`Closes #25`を記載。
 - 約940MBのCityGML原本と生成GeoPackageはGit対象外のままであることを確認。全51テスト、compileall、差分チェック成功済み。
 - 次はPR #26の差分とGitHub状態を最終レビューし、問題がなければReady化・squash mergeする。
+
+## 2026-09-24 PR #26をsquash merge
+
+- PR #26の全7ファイルを最終レビュー。GitHubは`MERGEABLE`・`CLEAN`、必須チェック登録なし、`Closes #25`記載済み、巨大データ混入なしを確認。
+- マージ前の全51テスト（17.650秒）、compileall、差分チェックに成功し、修正が必要な問題なしと判断。
+- PR #26をReady化してsquash merge。mainコミット`ceb530b`。Issue #25は自動クローズ。
+- ローカルmainを`origin/main`へfast-forward同期し、統合後も全51テスト（14.425秒）とcompileallに成功。
+- 次はPLATEAU LOD1とOSM建物の精度・影・性能比較をIssue化する。このマージ後記録はローカル未コミットで次の作業ブランチへ引き継ぐ。
+
+## 2026-09-24 Issue #27 PLATEAU LOD1とOSM建物を比較
+
+- [Issue #27](https://github.com/momo27182/KAGE-MICHI/issues/27)とNotion TODOを作成し、`codex/issue-27-plateau-osm-comparison`で着手。
+- 加工済みOSM建物だけを整合性検証付きで読むローダーと、外部通信なしでPLATEAUと比較するCLIを追加。
+- 和歌山駅半径1.7km、2026-08-11 14:00 JSTで固定。OSM 6,052件、PLATEAU 23,032件。外形IoU 0.297795、影IoU 0.313811。
+- OSMの10m値は5,387件（89.012%）で、補完由来数の上限。現行加工済みOSMでは原始欠損と真の10mを分離できない。PLATEAUの高さ中央値は6.879m、欠損0。
+- 影面積はOSM 1,384,220.703m²、PLATEAU 3,488,122.740m²。計算時間は1.676秒対9.120秒、全体22.287秒。
+- PLATEAUは影入力として採用価値があるが、現行画面へ直接差し替えず、時刻キーのキャッシュまたは事前計算を先に設計する。
+- 比較モジュールの2テストを追加。全53テスト（5.693秒）、compileall、差分チェックに成功。ローカル実装は完了し、未コミット・未プッシュ。
