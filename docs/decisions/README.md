@@ -18,6 +18,7 @@
 - `0002-store-prepared-osm-as-graphml-and-geopackage.md`: 加工済み道路・建物・地点とmanifestの保存形式
 - `0003-use-five-metre-edge-shade-sampling.md`: 道路日陰率の事前計算に5mサンプリングを使う
 - `0004-store-precomputed-shade-as-npz.md`: 事前計算値を検証可能なNPZとJSON manifestで保存する
+- `0005-use-official-wbgt-and-heat-alert-separately.md`: 公式WBGTと熱中症警戒情報を別データとして扱う
 
 ## ファイル名
 
