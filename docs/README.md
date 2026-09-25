@@ -12,5 +12,6 @@
 - `precomputed-shade.md`: 5分刻み道路日陰率の生成、保存、検証、夜間の意味、実測結果。
 - `precomputed-shade-benchmark.json`: 固定日24時間・288時刻の小さな実測スナップショット。
 - `time-comparison.md`: 基準日時と比較日時の4経路表示、エラー方針、キャッシュ、実測結果。
+- `weather-heat-source-selection.md`: 公式の気象・暑熱情報源比較、採用方針、データ契約、安全表示、障害時方針。
 - `decisions/`: 後から変更コストが高い技術判断と理由をADRとして保存する。
 

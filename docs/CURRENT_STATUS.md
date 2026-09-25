@@ -4,9 +4,9 @@
 
 ## 現在のPhase・GitHub
 
-Phase 4「道路日陰率の改善」を進行中。最後の計画済みTODOであるIssue #35を実装・検証中。
+Phase 4「道路日陰率の改善」は完了。Phase 5「気象・暑熱評価」のIssue #37を調査中。
 
-- ブランチ: `codex/issue-35-time-comparison`。`main`の`41b6ee9`から作成。
+- ブランチ: `codex/issue-37-weather-heat-research`。`main`の`649593d`から作成。
 - [PR #30](https://github.com/momo27182/KAGE-MICHI/pull/30)はReady化・squash merge済み。
 - [Issue #29](https://github.com/momo27182/KAGE-MICHI/issues/29)は自動クローズ。
 - [PR #32](https://github.com/momo27182/KAGE-MICHI/pull/32)はReady化・squash merge済み。
@@ -18,13 +18,22 @@ Phase 4「道路日陰率の改善」を進行中。最後の計画済みTODOで
 - 直前5分への時刻解決、安定エッジキー完全照合、部分日陰率による経路比較、成果物キャッシュ、欠損・不一致の明示エラー、昼夜表示を実装。
 - 実データ測定は初回0.788秒、時刻変更0.089秒、地点変更0.205秒。全72テスト成功。
 - Issue #33完了により、直前集計基準では全体23/28件、Phase 4は5/6件完了。
-- [Issue #35](https://github.com/momo27182/KAGE-MICHI/issues/35)「現在と別時刻の経路・日陰率を比較する」を実装中。Notion TODOは進行中。
+- [PR #36](https://github.com/momo27182/KAGE-MICHI/pull/36)はReady化・squash merge済み。マージコミットは`649593d`。
+- [Issue #35](https://github.com/momo27182/KAGE-MICHI/issues/35)は自動クローズ。Notion TODOは完了・完了条件確認済み。
 - 基準・比較日時ごとの最短／日陰優先4経路、距離・徒歩時間・日陰率・日向距離、要求／使用時刻、昼夜、計算条件を比較表示する。
 - 日付別成果物の解決、同一日時拒否、欠損の明示、同日成果物共有、経路キャッシュをテスト済み。
 - 実データ測定は2時刻初回0.911秒、同条件再表示0.0007秒、比較時刻だけ変更0.199秒、地点変更0.184秒。
 - 全79テスト（15 subtests）、compileall、差分検査に成功。
 - 実ブラウザーで14:00／15:00の4列比較、要求・使用時刻、昼間表示、安全上の注意、緑・赤・青・橙の4経路を確認済み。
-- [Draft PR #36](https://github.com/momo27182/KAGE-MICHI/pull/36)を作成。本文に`Closes #35`を記載し、ブランチは1コミット構成。
+- 統合後も`PYTHONPATH=src`を明示した全79テスト（15 subtests）、compileall、差分検査に成功。
+- Issue #35完了により、直前集計基準では全体24/28件、Phase 4は6/6件完了。
+- Phase 5の未完了TODOは「気象APIと暑熱指標を選定する」「気象データ取得とキャッシュを実装する」の2件で、どちらもP1・2日。
+- [Issue #37](https://github.com/momo27182/KAGE-MICHI/issues/37)「気象APIと暑熱指標を選定する」は調査と文書化まで完了。Notion TODOは進行中。
+- 環境省の暑さ指数Web APIを地点WBGT、熱中症警戒情報CSVを公的発表の情報源として採用する。両者は別データ・別表示とし、独自の警戒アラートへ合成しない。
+- 予測・推定実況・実測実況、品質、発表／対象／取得時刻、欠測、期限切れ、運用期間外を保持するデータ契約案を作成。
+- 気象庁アメダスは将来の補助表示候補とし、未文書化Web JSONには依存しない。APIクライアント、キャッシュ、画面、経路コストは次Issue以降。
+- 詳細は`docs/weather-heat-source-selection.md`とADR 0005。
+- [Draft PR #38](https://github.com/momo27182/KAGE-MICHI/pull/38)を作成。本文に`Closes #37`を記載し、ブランチは1コミット構成。
 
 ## Issue #29の結果
 
@@ -38,9 +47,9 @@ Phase 4「道路日陰率の改善」を進行中。最後の計画済みTODOで
 
 ブロッカーなし。通常ユーザーで起動済みの旧Streamlitは成果物の所有権により読み取り拒否となったが、成果物を生成した実行環境で検証用サーバーを起動し、実ブラウザー確認まで完了した。WindowsのACL・所有権変更は成功しておらず、永続変更は発生していない。
 
-1. PR #36を最終レビューする。
+1. PR #38を最終レビューする。
 2. 問題がなければReady化・squash mergeする。
-3. Issue #35の自動クローズとNotion更新後、Phase 4の完了判定を行う。
+3. 統合後、次Issueで公式データ取得と20分キャッシュを実装する。
 
 ## 維持する判断
 
@@ -50,3 +59,5 @@ Phase 4「道路日陰率の改善」を進行中。最後の計画済みTODOで
 - 事前計算成果物はNPZ + JSON manifestとし、日付・地域・入力版・影モデル版を追跡する。
 - PLATEAU原本・加工済み巨大データ・一時ベンチマーク出力はGitへ含めない。
 - 影モデルは地形、樹木、庇、複雑な屋根、建物間遮蔽を扱わない。
+- 公的発表と地点WBGTは別データとして扱い、「発表なし」を「安全」と表示しない。
+- 初期実装では環境省の公式WBGTを用い、気温等から独自WBGT・独自警戒アラートを作らない。
