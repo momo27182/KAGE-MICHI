@@ -289,10 +289,17 @@ def load_shade_artifact(
     manifest = ShadeArtifactManifest.from_json(manifest_path)
     if manifest.nighttime_semantics != NIGHTTIME_SEMANTICS:
         raise ValueError("shade artifact nighttime semantics mismatch")
-    if expected_source_sha256 is not None and dict(
-        sorted(expected_source_sha256.items())
-    ) != manifest.source_sha256:
-        raise ValueError("shade artifact source version mismatch")
+    if expected_source_sha256 is not None:
+        mismatched = [
+            name
+            for name, checksum in expected_source_sha256.items()
+            if manifest.source_sha256.get(name) != checksum
+        ]
+        if mismatched:
+            raise ValueError(
+                "shade artifact source version mismatch: "
+                + ", ".join(sorted(mismatched))
+            )
     data_path = root / manifest.files["ratios"]
     if not data_path.is_file():
         raise FileNotFoundError(f"shade ratios not found: {data_path}")

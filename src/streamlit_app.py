@@ -12,11 +12,13 @@ from pyproj import Transformer
 import streamlit as st
 from kage_michi.infrastructure.map_picker import clear_candidate, render_picker
 from kage_michi.infrastructure.osm_prepared import PreparedDatasetManifest
+from kage_michi.infrastructure.precomputed_shade import (
+    MANIFEST_FILE as SHADE_MANIFEST_FILE,
+)
 from kage_michi.map_selection import validate_selection
 
 from kage_michi.infrastructure.ui_runtime import (
     calculate_route_comparison_cached,
-    calculate_shadows_cached,
     load_facilities_cached,
     load_dataset_cached,
     search_places_cached,
@@ -29,6 +31,7 @@ from kage_michi.ui import UiInputs, build_disclosure, recalculation_keys
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA = ROOT / "data" / "prepared" / "wakayama-station"
+DEFAULT_SHADE_DATA = ROOT / "data" / "prepared" / "shade" / "wakayama-station"
 JST = ZoneInfo("Asia/Tokyo")
 GEOCODER_DOMAIN = os.getenv(
     "KAGE_MICHI_GEOCODER_DOMAIN", "nominatim.openstreetmap.org"
@@ -127,6 +130,9 @@ st.session_state.setdefault("destination_longitude", 135.1906)
 with st.sidebar:
     st.header("経路条件")
     data_directory = st.text_input("加工済みデータ", str(DEFAULT_DATA))
+    shade_root_directory = st.text_input(
+        "事前計算済み日陰データ", str(DEFAULT_SHADE_DATA)
+    )
     st.subheader("地名から地点を選択")
     _render_place_search(
         "start", "出発地", data_directory, "start_latitude", "start_longitude"
@@ -165,13 +171,14 @@ with st.sidebar:
     calculate = st.button("経路を計算", type="primary", use_container_width=True)
 
 st.info(
-    "再計算範囲: 地点・ペナルティ変更は経路のみ、日時変更は影と経路、"
-    "加工済みデータ変更は全処理を更新します。"
+    "再計算範囲: 地点・ペナルティ変更は経路のみ、日時変更は事前計算値の"
+    "時刻選択と経路、加工済みデータ変更は全処理を更新します。"
 )
 
 current_signature = (
     str(Path(data_directory).resolve()), start_latitude, start_longitude,
     destination_latitude, destination_longitude, departure_date, departure_time, sun_penalty,
+    str(Path(shade_root_directory).resolve()),
 )
 area = None
 try:
@@ -180,7 +187,17 @@ try:
     data_version = str(manifest_path.stat().st_mtime_ns)
     manifest = PreparedDatasetManifest.from_json(manifest_path)
     area = SearchArea(GeoPoint(**manifest.center), manifest.radius_m)
-    current_signature += (data_version,)
+    shade_manifest = (
+        Path(shade_root_directory).resolve()
+        / departure_date.isoformat()
+        / SHADE_MANIFEST_FILE
+    )
+    shade_signature = (
+        str(shade_manifest.stat().st_mtime_ns)
+        if shade_manifest.is_file()
+        else "missing"
+    )
+    current_signature += (data_version, shade_signature)
 except (OSError, ValueError) as error:
     clear_candidate()
     st.session_state.pop("map_scope", None)
@@ -198,6 +215,16 @@ if calculate and area is not None:
         manifest_path = dataset_path / "manifest.json"
         data_version = str(manifest_path.stat().st_mtime_ns)
         departure = datetime.combine(departure_date, departure_time, JST)
+        shade_directory = (
+            Path(shade_root_directory).resolve() / departure.date().isoformat()
+        )
+        shade_manifest_path = shade_directory / SHADE_MANIFEST_FILE
+        if not shade_manifest_path.is_file():
+            raise FileNotFoundError(
+                "事前計算済み日陰率がありません: "
+                f"{shade_manifest_path}"
+            )
+        shade_version = str(shade_manifest_path.stat().st_mtime_ns)
         inputs = UiInputs(
             str(dataset_path),
             GeoPoint(start_latitude, start_longitude),
@@ -207,12 +234,11 @@ if calculate and area is not None:
         )
         keys = recalculation_keys(inputs, data_version)
         dataset = load_dataset_cached(*keys.dataset)
-        shadows = calculate_shadows_cached(
-            keys.dataset[0], keys.dataset[1], departure.isoformat()
-        )
         comparison = calculate_route_comparison_cached(
             keys.dataset[0],
             keys.dataset[1],
+            str(shade_directory),
+            shade_version,
             departure.isoformat(),
             start_latitude,
             start_longitude,
@@ -223,17 +249,21 @@ if calculate and area is not None:
         total_seconds = perf_counter() - request_started
         disclosure = build_disclosure(
             dataset,
-            shadows.result,
+            None,
             comparison.result.shade_optimized,
             departure,
             comparison.calculated_at,
+            precomputed_shade=True,
+            daylight=comparison.shade_time.daylight,
         )
         shortest_disclosure = build_disclosure(
             dataset,
-            shadows.result,
+            None,
             comparison.result.shortest,
             departure,
             comparison.calculated_at,
+            precomputed_shade=True,
+            daylight=comparison.shade_time.daylight,
         )
 
         graph = dataset.payload.graph
@@ -251,8 +281,10 @@ if calculate and area is not None:
             route_coordinates,
             shortest_coordinates,
             total_seconds,
-            shadows.elapsed_seconds,
+            comparison.shade_load_seconds,
             comparison.elapsed_seconds,
+            comparison.shade_time.resolved.isoformat(),
+            comparison.shade_time.daylight,
         )
     except (OSError, ValueError, RouteNotFoundError) as error:
         st.error(str(error))
@@ -263,7 +295,8 @@ shortest_coordinates = ()
 if snapshot and snapshot[0] == current_signature:
     (
         _, disclosure, shortest_disclosure, comparison, coordinates,
-        shortest_coordinates, total_seconds, shadow_seconds, route_seconds,
+        shortest_coordinates, total_seconds, shade_load_seconds, route_seconds,
+        shade_timestamp, daylight,
     ) = snapshot
     st.subheader("ルート比較")
     st.markdown(
@@ -291,12 +324,14 @@ if snapshot and snapshot[0] == current_signature:
     )
     with st.expander("計算根拠・時刻・データ情報", expanded=True):
         st.write(f"対象日時: `{disclosure.departure_iso}`")
+        st.write(f"使用した事前計算時刻: `{shade_timestamp}`")
+        st.write(f"太陽状態: {'昼間' if daylight else '夜間（直達日射なし）'}")
         st.write(f"計算実行時刻: `{disclosure.calculated_at_iso}`")
         st.write(f"データ取得処理日時: `{disclosure.data_acquired_at}`")
         st.write(f"データ出典: {disclosure.data_source} / © OpenStreetMap contributors")
         st.write(f"データ範囲: `{disclosure.data_scope}`")
         st.write(
-            f"内訳（未キャッシュ計算時）: 影 {shadow_seconds:.3f}秒 / "
+            f"内訳（未キャッシュ計算時）: 日陰データ読込 {shade_load_seconds:.3f}秒 / "
             f"経路 {route_seconds:.3f}秒"
         )
     for warning in disclosure.warnings:
