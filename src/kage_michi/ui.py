@@ -63,17 +63,31 @@ def changed_stages(
 
 def build_disclosure(
     dataset: SpatialDataset,
-    shadows: ShadowResult,
+    shadows: ShadowResult | None,
     route: RouteResult,
     departure: datetime,
     calculated_at: datetime,
+    *,
+    precomputed_shade: bool = False,
+    daylight: bool = True,
 ) -> ResultDisclosure:
-    warnings = (
-        "日陰と経路は推定値であり、暑熱環境や安全を保証するものではありません。",
-        "建物高さの欠損は10mで補完しています。PLATEAUは未導入です。",
-        "影は建物外形の凸包による簡易モデルです。",
-        "道路の日陰は区間中央点だけで判定しています。",
-    )
+    if precomputed_shade:
+        warnings = (
+            "日陰と経路は推定値であり、暑熱環境や安全を保証するものではありません。",
+            "PLATEAU LOD1建物と凸包による簡易影モデルを使用しています。",
+            "道路日陰率は道路上を5m以下の間隔でサンプリングした事前計算値です。",
+        )
+        if not daylight:
+            warnings += (
+                "夜間は直達日射がない状態です。建物による日陰100%を意味しません。",
+            )
+    else:
+        warnings = (
+            "日陰と経路は推定値であり、暑熱環境や安全を保証するものではありません。",
+            "建物高さの欠損は10mで補完しています。PLATEAUは未導入です。",
+            "影は建物外形の凸包による簡易モデルです。",
+            "道路の日陰は区間中央点だけで判定しています。",
+        )
     return ResultDisclosure(
         route_distance_m=route.distance_m,
         sunny_distance_m=route.sunny_distance_m,

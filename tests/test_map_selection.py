@@ -157,7 +157,7 @@ class MapScreenTests(unittest.TestCase):
                          "Representative integration requires prepared Wakayama dataset")
     def test_result_survives_rerun_and_hides_after_input_change(self):
         app = AppTest.from_file(str(ROOT / "src/streamlit_app.py")).run(timeout=30)
-        app.date_input[0].set_value(date(2025, 8, 1)).run()
+        app.date_input[0].set_value(date(2026, 8, 11)).run()
         next(b for b in app.button if b.label == "経路を計算").click().run(timeout=60)
         self.assertFalse(app.exception)
         self.assertTrue(any(m.label == "距離増加" for m in app.metric))

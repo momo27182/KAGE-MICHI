@@ -22,6 +22,11 @@ from .osm_prepared import (
     load_prepared_spots,
     validate_dataset_scope,
 )
+from .precomputed_shade import PreparedShadeRatios, load_shade_artifact
+from .precomputed_shade_routing import (
+    PrecomputedShadeRoutePlanner,
+    ResolvedShadeTime,
+)
 from .shade_route_planner import MidpointShadeRoutePlanner
 from .shadow_calculator import BuildingShadowCalculator
 
@@ -45,6 +50,15 @@ class TimedRouteComparison:
     result: RouteComparison
     elapsed_seconds: float
     calculated_at: datetime
+    shade_time: ResolvedShadeTime | None = None
+    shade_load_seconds: float = 0.0
+
+
+@dataclass(frozen=True)
+class TimedPreparedShade:
+    result: PreparedShadeRatios
+    elapsed_seconds: float
+    loaded_at: datetime
 
 
 @st.cache_resource
@@ -90,6 +104,25 @@ def load_facilities_cached(
     return prepare_facility_markers(load_prepared_spots(data_directory))
 
 
+@st.cache_resource(show_spinner="事前計算済み日陰率を検証しています…")
+def load_precomputed_shade_cached(
+    shade_directory: str,
+    shade_version: str,
+    osm_graph_sha256: str,
+) -> TimedPreparedShade:
+    del shade_version
+    started = perf_counter()
+    result = load_shade_artifact(
+        shade_directory,
+        expected_source_sha256={"osm_graph": osm_graph_sha256},
+    )
+    return TimedPreparedShade(
+        result,
+        perf_counter() - started,
+        datetime.now(timezone.utc),
+    )
+
+
 @st.cache_data(show_spinner="指定時刻の影を計算しています…")
 def calculate_shadows_cached(
     data_directory: str,
@@ -133,6 +166,8 @@ def calculate_route_cached(
 def calculate_route_comparison_cached(
     data_directory: str,
     data_version: str,
+    shade_directory: str,
+    shade_version: str,
     departure_iso: str,
     start_latitude: float,
     start_longitude: float,
@@ -144,11 +179,24 @@ def calculate_route_comparison_cached(
     start = GeoPoint(start_latitude, start_longitude)
     destination = GeoPoint(destination_latitude, destination_longitude)
     validate_dataset_scope(dataset, start, destination)
-    shadows = calculate_shadows_cached(data_directory, data_version, departure_iso)
+    manifest = dataset.payload.manifest
+    prepared = load_precomputed_shade_cached(
+        shade_directory,
+        shade_version,
+        manifest.sha256["graph"],
+    )
     started = perf_counter()
-    result = MidpointShadeRoutePlanner(sun_penalty).compare_routes(
-        dataset, start, destination, shadows.result
+    result, shade_time = PrecomputedShadeRoutePlanner(sun_penalty).compare_routes(
+        dataset,
+        start,
+        destination,
+        prepared.result,
+        datetime.fromisoformat(departure_iso),
     )
     return TimedRouteComparison(
-        result, perf_counter() - started, datetime.now(timezone.utc)
+        result,
+        perf_counter() - started,
+        datetime.now(timezone.utc),
+        shade_time,
+        prepared.elapsed_seconds,
     )
