@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, time
 import os
 from pathlib import Path
@@ -12,9 +13,6 @@ from pyproj import Transformer
 import streamlit as st
 from kage_michi.infrastructure.map_picker import clear_candidate, render_picker
 from kage_michi.infrastructure.osm_prepared import PreparedDatasetManifest
-from kage_michi.infrastructure.precomputed_shade import (
-    MANIFEST_FILE as SHADE_MANIFEST_FILE,
-)
 from kage_michi.map_selection import validate_selection
 
 from kage_michi.infrastructure.ui_runtime import (
@@ -24,9 +22,19 @@ from kage_michi.infrastructure.ui_runtime import (
     search_places_cached,
 )
 from kage_michi.geocoding import PlaceSearchOutcome, SearchArea
-from kage_michi.models import GeoPoint
+from kage_michi.models import GeoPoint, RouteComparison
 from kage_michi.routing import RouteNotFoundError
-from kage_michi.ui import UiInputs, build_disclosure, recalculation_keys
+from kage_michi.time_comparison import (
+    default_comparison_datetime,
+    resolve_shade_artifact,
+    validate_comparison_datetimes,
+)
+from kage_michi.ui import (
+    ResultDisclosure,
+    UiInputs,
+    build_disclosure,
+    recalculation_keys,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,6 +48,20 @@ GEOCODER_USER_AGENT = os.getenv(
     "KAGE_MICHI_GEOCODER_USER_AGENT",
     "KAGE-MICHI/0.1 (+https://github.com/momo27182/KAGE-MICHI)",
 )
+
+
+@dataclass(frozen=True)
+class RouteTimeView:
+    departure: datetime
+    disclosure: ResultDisclosure
+    shortest_disclosure: ResultDisclosure
+    comparison: RouteComparison
+    route_coordinates: tuple[tuple[float, float], ...]
+    shortest_coordinates: tuple[tuple[float, float], ...]
+    shade_timestamp: str
+    daylight: bool
+    shade_load_seconds: float
+    route_seconds: float
 
 
 def _show_search_message(outcome: PlaceSearchOutcome) -> None:
@@ -63,6 +85,63 @@ def _route_coordinates(graph, node_ids: tuple[int, ...]) -> tuple[tuple[float, f
         longitude, latitude = transformer.transform(node["x"], node["y"])
         coordinates.append((latitude, longitude))
     return tuple(coordinates)
+
+
+def _calculate_time_view(
+    dataset,
+    dataset_key: tuple[str, str],
+    shade_root_directory: str,
+    departure: datetime,
+    start: GeoPoint,
+    destination: GeoPoint,
+    sun_penalty: float,
+) -> RouteTimeView:
+    artifact = resolve_shade_artifact(shade_root_directory, departure)
+    timed = calculate_route_comparison_cached(
+        dataset_key[0],
+        dataset_key[1],
+        str(artifact.directory),
+        artifact.version,
+        departure.isoformat(),
+        start.latitude,
+        start.longitude,
+        destination.latitude,
+        destination.longitude,
+        sun_penalty,
+    )
+    disclosure = build_disclosure(
+        dataset,
+        None,
+        timed.result.shade_optimized,
+        departure,
+        timed.calculated_at,
+        precomputed_shade=True,
+        daylight=timed.shade_time.daylight,
+    )
+    shortest_disclosure = build_disclosure(
+        dataset,
+        None,
+        timed.result.shortest,
+        departure,
+        timed.calculated_at,
+        precomputed_shade=True,
+        daylight=timed.shade_time.daylight,
+    )
+    graph = dataset.payload.graph
+    return RouteTimeView(
+        departure=departure,
+        disclosure=disclosure,
+        shortest_disclosure=shortest_disclosure,
+        comparison=timed.result,
+        route_coordinates=_route_coordinates(
+            graph, timed.result.shade_optimized.node_ids
+        ),
+        shortest_coordinates=_route_coordinates(graph, timed.result.shortest.node_ids),
+        shade_timestamp=timed.shade_time.resolved.isoformat(),
+        daylight=timed.shade_time.daylight,
+        shade_load_seconds=timed.shade_load_seconds,
+        route_seconds=timed.elapsed_seconds,
+    )
 
 
 def _render_place_search(
@@ -126,6 +205,8 @@ st.session_state.setdefault("start_latitude", 34.2325)
 st.session_state.setdefault("start_longitude", 135.1917)
 st.session_state.setdefault("destination_latitude", 34.2241)
 st.session_state.setdefault("destination_longitude", 135.1906)
+initial_departure = datetime.combine(datetime.now(JST).date(), time(14, 0), JST)
+initial_comparison = default_comparison_datetime(initial_departure)
 
 with st.sidebar:
     st.header("経路条件")
@@ -164,11 +245,18 @@ with st.sidebar:
     )
     departure_date = st.date_input("出発日", value=datetime.now(JST).date())
     departure_time = st.time_input("出発時刻", value=time(14, 0))
+    st.subheader("別時刻との比較")
+    comparison_date = st.date_input(
+        "比較日", value=initial_comparison.date(), key="comparison_date"
+    )
+    comparison_time = st.time_input(
+        "比較時刻", value=initial_comparison.time(), key="comparison_time"
+    )
     sun_penalty = st.slider("日向の距離ペナルティ", 1.0, 20.0, 10.0, 1.0)
     st.subheader("周辺施設")
     show_convenience = st.checkbox("コンビニ", value=True)
     show_drinking_water = st.checkbox("給水地点", value=True)
-    calculate = st.button("経路を計算", type="primary", use_container_width=True)
+    calculate = st.button("2時刻を比較", type="primary", use_container_width=True)
 
 st.info(
     "再計算範囲: 地点・ペナルティ変更は経路のみ、日時変更は事前計算値の"
@@ -179,6 +267,7 @@ current_signature = (
     str(Path(data_directory).resolve()), start_latitude, start_longitude,
     destination_latitude, destination_longitude, departure_date, departure_time, sun_penalty,
     str(Path(shade_root_directory).resolve()),
+    comparison_date, comparison_time,
 )
 area = None
 try:
@@ -187,17 +276,19 @@ try:
     data_version = str(manifest_path.stat().st_mtime_ns)
     manifest = PreparedDatasetManifest.from_json(manifest_path)
     area = SearchArea(GeoPoint(**manifest.center), manifest.radius_m)
-    shade_manifest = (
-        Path(shade_root_directory).resolve()
-        / departure_date.isoformat()
-        / SHADE_MANIFEST_FILE
-    )
-    shade_signature = (
-        str(shade_manifest.stat().st_mtime_ns)
-        if shade_manifest.is_file()
-        else "missing"
-    )
-    current_signature += (data_version, shade_signature)
+    shade_signatures = []
+    for requested_date in (departure_date, comparison_date):
+        shade_manifest = (
+            Path(shade_root_directory).resolve()
+            / requested_date.isoformat()
+            / "manifest.json"
+        )
+        shade_signatures.append(
+            str(shade_manifest.stat().st_mtime_ns)
+            if shade_manifest.is_file()
+            else f"missing:{requested_date.isoformat()}"
+        )
+    current_signature += (data_version, *shade_signatures)
 except (OSError, ValueError) as error:
     clear_candidate()
     st.session_state.pop("map_scope", None)
@@ -215,16 +306,10 @@ if calculate and area is not None:
         manifest_path = dataset_path / "manifest.json"
         data_version = str(manifest_path.stat().st_mtime_ns)
         departure = datetime.combine(departure_date, departure_time, JST)
-        shade_directory = (
-            Path(shade_root_directory).resolve() / departure.date().isoformat()
+        comparison_departure = datetime.combine(
+            comparison_date, comparison_time, JST
         )
-        shade_manifest_path = shade_directory / SHADE_MANIFEST_FILE
-        if not shade_manifest_path.is_file():
-            raise FileNotFoundError(
-                "事前計算済み日陰率がありません: "
-                f"{shade_manifest_path}"
-            )
-        shade_version = str(shade_manifest_path.stat().st_mtime_ns)
+        validate_comparison_datetimes(departure, comparison_departure)
         inputs = UiInputs(
             str(dataset_path),
             GeoPoint(start_latitude, start_longitude),
@@ -234,57 +319,32 @@ if calculate and area is not None:
         )
         keys = recalculation_keys(inputs, data_version)
         dataset = load_dataset_cached(*keys.dataset)
-        comparison = calculate_route_comparison_cached(
-            keys.dataset[0],
-            keys.dataset[1],
-            str(shade_directory),
-            shade_version,
-            departure.isoformat(),
-            start_latitude,
-            start_longitude,
-            destination_latitude,
-            destination_longitude,
+        start = GeoPoint(start_latitude, start_longitude)
+        destination = GeoPoint(destination_latitude, destination_longitude)
+        base_view = _calculate_time_view(
+            dataset,
+            keys.dataset,
+            shade_root_directory,
+            departure,
+            start,
+            destination,
+            sun_penalty,
+        )
+        comparison_view = _calculate_time_view(
+            dataset,
+            keys.dataset,
+            shade_root_directory,
+            comparison_departure,
+            start,
+            destination,
             sun_penalty,
         )
         total_seconds = perf_counter() - request_started
-        disclosure = build_disclosure(
-            dataset,
-            None,
-            comparison.result.shade_optimized,
-            departure,
-            comparison.calculated_at,
-            precomputed_shade=True,
-            daylight=comparison.shade_time.daylight,
-        )
-        shortest_disclosure = build_disclosure(
-            dataset,
-            None,
-            comparison.result.shortest,
-            departure,
-            comparison.calculated_at,
-            precomputed_shade=True,
-            daylight=comparison.shade_time.daylight,
-        )
-
-        graph = dataset.payload.graph
-        route_coordinates = _route_coordinates(
-            graph, comparison.result.shade_optimized.node_ids
-        )
-        shortest_coordinates = _route_coordinates(
-            graph, comparison.result.shortest.node_ids
-        )
         st.session_state["route_snapshot"] = (
             current_signature,
-            disclosure,
-            shortest_disclosure,
-            comparison.result,
-            route_coordinates,
-            shortest_coordinates,
+            base_view,
+            comparison_view,
             total_seconds,
-            comparison.shade_load_seconds,
-            comparison.elapsed_seconds,
-            comparison.shade_time.resolved.isoformat(),
-            comparison.shade_time.daylight,
         )
     except (OSError, ValueError, RouteNotFoundError) as error:
         st.error(str(error))
@@ -292,54 +352,82 @@ if calculate and area is not None:
 snapshot = st.session_state.get("route_snapshot")
 coordinates = ()
 shortest_coordinates = ()
+comparison_coordinates = ()
+comparison_shortest_coordinates = ()
 if snapshot and snapshot[0] == current_signature:
-    (
-        _, disclosure, shortest_disclosure, comparison, coordinates,
-        shortest_coordinates, total_seconds, shade_load_seconds, route_seconds,
-        shade_timestamp, daylight,
-    ) = snapshot
-    st.subheader("ルート比較")
+    _, base_view, comparison_view, total_seconds = snapshot
+    coordinates = base_view.route_coordinates
+    shortest_coordinates = base_view.shortest_coordinates
+    comparison_coordinates = comparison_view.route_coordinates
+    comparison_shortest_coordinates = comparison_view.shortest_coordinates
+    st.subheader("2時刻のルート比較")
     st.markdown(
-        "| 指標 | 最短ルート | 日陰優先ルート |\n"
-        "|---|---:|---:|\n"
-        f"| 距離 | {shortest_disclosure.route_distance_m:,.0f} m | "
-        f"{disclosure.route_distance_m:,.0f} m |\n"
-        f"| 推定徒歩時間 | {comparison.shortest.estimated_walk_minutes} 分 | "
-        f"{comparison.shade_optimized.estimated_walk_minutes} 分 |\n"
-        f"| 推定日向距離 | {shortest_disclosure.sunny_distance_m:,.0f} m | "
-        f"{disclosure.sunny_distance_m:,.0f} m |\n"
-        f"| 推定日陰率 | {shortest_disclosure.shade_ratio_pct:.1f}% | "
-        f"{disclosure.shade_ratio_pct:.1f}% |"
+        "| 指標 | 基準・最短 | 基準・日陰優先 | 比較・最短 | 比較・日陰優先 |\n"
+        "|---|---:|---:|---:|---:|\n"
+        f"| 距離 | {base_view.shortest_disclosure.route_distance_m:,.0f} m | "
+        f"{base_view.disclosure.route_distance_m:,.0f} m | "
+        f"{comparison_view.shortest_disclosure.route_distance_m:,.0f} m | "
+        f"{comparison_view.disclosure.route_distance_m:,.0f} m |\n"
+        f"| 推定徒歩時間 | {base_view.comparison.shortest.estimated_walk_minutes} 分 | "
+        f"{base_view.comparison.shade_optimized.estimated_walk_minutes} 分 | "
+        f"{comparison_view.comparison.shortest.estimated_walk_minutes} 分 | "
+        f"{comparison_view.comparison.shade_optimized.estimated_walk_minutes} 分 |\n"
+        f"| 推定日向距離 | {base_view.shortest_disclosure.sunny_distance_m:,.0f} m | "
+        f"{base_view.disclosure.sunny_distance_m:,.0f} m | "
+        f"{comparison_view.shortest_disclosure.sunny_distance_m:,.0f} m | "
+        f"{comparison_view.disclosure.sunny_distance_m:,.0f} m |\n"
+        f"| 推定日陰率 | {base_view.shortest_disclosure.shade_ratio_pct:.1f}% | "
+        f"{base_view.disclosure.shade_ratio_pct:.1f}% | "
+        f"{comparison_view.shortest_disclosure.shade_ratio_pct:.1f}% | "
+        f"{comparison_view.disclosure.shade_ratio_pct:.1f}% |"
     )
-    first, second, third = st.columns(3)
-    first.metric("距離増加", f"{comparison.distance_increase_m:+,.0f} m")
+    first, second, third, fourth = st.columns(4)
+    first.metric("距離増加", f"{base_view.comparison.distance_increase_m:+,.0f} m")
     second.metric(
-        "日陰率の差",
-        f"{comparison.shade_improvement_points:+.1f} ポイント",
+        "比較時刻の距離増加",
+        f"{comparison_view.comparison.distance_increase_m:+,.0f} m",
     )
-    third.metric("前回の計算処理", f"{total_seconds:.3f} 秒")
+    third.metric(
+        "日陰優先の日陰率変化",
+        f"{comparison_view.disclosure.shade_ratio_pct - base_view.disclosure.shade_ratio_pct:+.1f} ポイント",
+    )
+    fourth.metric("前回の2時刻計算", f"{total_seconds:.3f} 秒")
     st.caption(
-        "地図凡例: 緑の実線＝日陰優先ルート / 赤の破線＝最短ルート。"
+        "地図凡例: 基準は緑実線（日陰優先）・赤破線（最短）、"
+        "比較は青実線（日陰優先）・橙破線（最短）。"
         "推定徒歩時間は80m/分で算出しています。差が0の場合は同一ルートです。"
     )
     with st.expander("計算根拠・時刻・データ情報", expanded=True):
-        st.write(f"対象日時: `{disclosure.departure_iso}`")
-        st.write(f"使用した事前計算時刻: `{shade_timestamp}`")
-        st.write(f"太陽状態: {'昼間' if daylight else '夜間（直達日射なし）'}")
-        st.write(f"計算実行時刻: `{disclosure.calculated_at_iso}`")
-        st.write(f"データ取得処理日時: `{disclosure.data_acquired_at}`")
-        st.write(f"データ出典: {disclosure.data_source} / © OpenStreetMap contributors")
-        st.write(f"データ範囲: `{disclosure.data_scope}`")
+        for label, view in (("基準", base_view), ("比較", comparison_view)):
+            st.write(f"{label}の要求日時: `{view.disclosure.departure_iso}`")
+            st.write(f"{label}で使用した事前計算時刻: `{view.shade_timestamp}`")
+            st.write(
+                f"{label}の太陽状態: "
+                f"{'昼間' if view.daylight else '夜間（直達日射なし）'}"
+            )
+            st.write(
+                f"{label}の内訳（未キャッシュ計算時）: 日陰データ読込 "
+                f"{view.shade_load_seconds:.3f}秒 / 経路 {view.route_seconds:.3f}秒"
+            )
+        st.write(f"データ取得処理日時: `{base_view.disclosure.data_acquired_at}`")
         st.write(
-            f"内訳（未キャッシュ計算時）: 日陰データ読込 {shade_load_seconds:.3f}秒 / "
-            f"経路 {route_seconds:.3f}秒"
+            f"データ出典: {base_view.disclosure.data_source} / "
+            "© OpenStreetMap contributors"
         )
-    for warning in disclosure.warnings:
+        st.write(f"データ範囲: `{base_view.disclosure.data_scope}`")
+        st.write(
+            f"計算条件: 日向の距離ペナルティ {sun_penalty:.1f} / "
+            "徒歩速度 80m/分"
+        )
+    warnings = dict.fromkeys(
+        base_view.disclosure.warnings + comparison_view.disclosure.warnings
+    )
+    for warning in warnings:
         st.warning(warning)
 elif snapshot:
-    st.warning("条件が変更されたため、前回の経路を非表示にしました。「経路を計算」で更新してください。")
+    st.warning("条件が変更されたため、前回の経路を非表示にしました。「2時刻を比較」で更新してください。")
 else:
-    st.write("サイドバーで条件を確認し、「経路を計算」を押してください。")
+    st.write("サイドバーで条件を確認し、「2時刻を比較」を押してください。")
 
 if area is not None:
     facilities = ()
@@ -370,4 +458,6 @@ if area is not None:
         coordinates,
         shortest_coordinates,
         facilities,
+        comparison_coordinates,
+        comparison_shortest_coordinates,
     )

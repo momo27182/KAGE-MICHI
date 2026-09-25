@@ -4,21 +4,27 @@
 
 ## 現在のPhase・GitHub
 
-Phase 4「道路日陰率の改善」を進行中。Issue #33の画面統合を専用ブランチで実装中。
+Phase 4「道路日陰率の改善」を進行中。最後の計画済みTODOであるIssue #35を実装・検証中。
 
-- ブランチ: `codex/issue-33-integrate-precomputed-shade`（`origin/main`の`efe5715`から作成）。
+- ブランチ: `codex/issue-35-time-comparison`。`main`の`41b6ee9`から作成。
 - [PR #30](https://github.com/momo27182/KAGE-MICHI/pull/30)はReady化・squash merge済み。
 - [Issue #29](https://github.com/momo27182/KAGE-MICHI/issues/29)は自動クローズ。
 - [PR #32](https://github.com/momo27182/KAGE-MICHI/pull/32)はReady化・squash merge済み。
 - [Issue #31](https://github.com/momo27182/KAGE-MICHI/issues/31)は自動クローズ。Notion TODOは完了・完了条件確認済み。
 - NPZ + JSON manifest、原子的公開、誤上書き防止、改ざん・入力版不一致検出、夜間の意味を実装済み。
 - 実データ24時間・288時刻の生成に成功。45分02秒、ピーク447.1 MiB、出力1.06 MiB、完全読込最大0.0787秒。
-- マージコミットは`efe5715`。マージ後の記録だけローカル未コミットで次作業へ引き継ぐ。
-- [Issue #33](https://github.com/momo27182/KAGE-MICHI/issues/33)「事前計算済み日陰率を経路探索・画面へ統合する」を実装中。Notion TODOは進行中。
-- [Draft PR #34](https://github.com/momo27182/KAGE-MICHI/pull/34)を`Closes #33`付きで作成。実装は1コミットに集約済み。
+- [PR #34](https://github.com/momo27182/KAGE-MICHI/pull/34)はReady化・squash merge済み。マージコミットは`41b6ee9`。
+- [Issue #33](https://github.com/momo27182/KAGE-MICHI/issues/33)は自動クローズ。Notion TODOは完了・完了条件確認済み。
 - 直前5分への時刻解決、安定エッジキー完全照合、部分日陰率による経路比較、成果物キャッシュ、欠損・不一致の明示エラー、昼夜表示を実装。
 - 実データ測定は初回0.788秒、時刻変更0.089秒、地点変更0.205秒。全72テスト成功。
-- NotionでIssue #27・#29・#31と重複していた旧TODO 3件を、対応Issueを記載して完了へ整理。全体22/28件、Phase 4は4/6件完了。
+- Issue #33完了により、直前集計基準では全体23/28件、Phase 4は5/6件完了。
+- [Issue #35](https://github.com/momo27182/KAGE-MICHI/issues/35)「現在と別時刻の経路・日陰率を比較する」を実装中。Notion TODOは進行中。
+- 基準・比較日時ごとの最短／日陰優先4経路、距離・徒歩時間・日陰率・日向距離、要求／使用時刻、昼夜、計算条件を比較表示する。
+- 日付別成果物の解決、同一日時拒否、欠損の明示、同日成果物共有、経路キャッシュをテスト済み。
+- 実データ測定は2時刻初回0.911秒、同条件再表示0.0007秒、比較時刻だけ変更0.199秒、地点変更0.184秒。
+- 全79テスト（15 subtests）、compileall、差分検査に成功。
+- 実ブラウザーで14:00／15:00の4列比較、要求・使用時刻、昼間表示、安全上の注意、緑・赤・青・橙の4経路を確認済み。
+- [Draft PR #36](https://github.com/momo27182/KAGE-MICHI/pull/36)を作成。本文に`Closes #35`を記載し、ブランチは1コミット構成。
 
 ## Issue #29の結果
 
@@ -32,9 +38,9 @@ Phase 4「道路日陰率の改善」を進行中。Issue #33の画面統合を�
 
 ブロッカーなし。通常ユーザーで起動済みの旧Streamlitは成果物の所有権により読み取り拒否となったが、成果物を生成した実行環境で検証用サーバーを起動し、実ブラウザー確認まで完了した。WindowsのACL・所有権変更は成功しておらず、永続変更は発生していない。
 
-1. PR #34の差分とGitHub状態を最終レビューする。
+1. PR #36を最終レビューする。
 2. 問題がなければReady化・squash mergeする。
-3. main同期後、Issue #33・Notion TODO・Phase 4完了条件を確認する。
+3. Issue #35の自動クローズとNotion更新後、Phase 4の完了判定を行う。
 
 ## 維持する判断
 

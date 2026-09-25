@@ -51,6 +51,32 @@ def measure(
     }
 
 
+def measure_pair(
+    data_directory: Path,
+    shade_directory: Path,
+    data_version: str,
+    shade_version: str,
+    departures: tuple[str, str],
+    destination: tuple[float, float],
+) -> dict[str, object]:
+    started = perf_counter()
+    routes = tuple(
+        measure(
+            data_directory,
+            shade_directory,
+            data_version,
+            shade_version,
+            departure,
+            destination,
+        )
+        for departure in departures
+    )
+    return {
+        "total_seconds": perf_counter() - started,
+        "times": routes,
+    }
+
+
 def main() -> None:
     parser = ArgumentParser()
     parser.add_argument(
@@ -72,21 +98,28 @@ def main() -> None:
     load_precomputed_shade_cached.clear()
     calculate_route_comparison_cached.clear()
     results = {
-        "first": measure(
+        "two_time_first": measure_pair(
             data_directory, shade_directory, data_version, shade_version,
-            "2026-08-11T14:04:00+09:00", (34.2241, 135.1906),
+            ("2026-08-11T14:04:00+09:00", "2026-08-11T15:04:00+09:00"),
+            (34.2241, 135.1906),
         ),
-        "cached": measure(
+        "two_time_cached": measure_pair(
             data_directory, shade_directory, data_version, shade_version,
-            "2026-08-11T14:04:00+09:00", (34.2241, 135.1906),
+            ("2026-08-11T14:04:00+09:00", "2026-08-11T15:04:00+09:00"),
+            (34.2241, 135.1906),
         ),
-        "time_changed": measure(
+        "comparison_time_changed": measure_pair(
             data_directory, shade_directory, data_version, shade_version,
-            "2026-08-11T14:09:00+09:00", (34.2241, 135.1906),
+            ("2026-08-11T14:04:00+09:00", "2026-08-11T16:04:00+09:00"),
+            (34.2241, 135.1906),
         ),
-        "point_changed": measure(
-            data_directory, shade_directory, data_version, shade_version,
-            "2026-08-11T14:09:00+09:00", (34.2250, 135.1910),
+        "point_changed": measure_pair(
+            data_directory,
+            shade_directory,
+            data_version,
+            shade_version,
+            ("2026-08-11T14:04:00+09:00", "2026-08-11T15:04:00+09:00"),
+            (34.2250, 135.1910),
         ),
     }
     print(json.dumps(results, ensure_ascii=False, indent=2))

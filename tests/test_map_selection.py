@@ -156,21 +156,46 @@ class MapScreenTests(unittest.TestCase):
     @unittest.skipUnless((ROOT / "data/prepared/wakayama-station/manifest.json").exists(),
                          "Representative integration requires prepared Wakayama dataset")
     def test_result_survives_rerun_and_hides_after_input_change(self):
+        with patch("kage_michi.infrastructure.map_picker.st_folium") as map_view:
+            app = AppTest.from_file(str(ROOT / "src/streamlit_app.py")).run(timeout=30)
+            app.date_input[0].set_value(date(2026, 8, 11)).run()
+            app.date_input[1].set_value(date(2026, 8, 11)).run()
+            next(b for b in app.button if b.label == "2時刻を比較").click().run(timeout=60)
+            self.assertFalse(app.exception)
+            self.assertTrue(any(m.label == "距離増加" for m in app.metric))
+            self.assertTrue(any("基準・最短" in item.value and "比較・日陰優先" in item.value
+                                for item in app.markdown))
+            self.assertTrue(any("地図凡例" in item.value for item in app.caption))
+            features = map_view.call_args.kwargs["feature_group_to_add"]
+            routes = [child for child in features._children.values()
+                      if type(child) is folium.PolyLine]
+            self.assertEqual(
+                [route.options["color"] for route in routes],
+                ["#167d4a", "#d32f2f", "#1565c0", "#ef6c00"],
+            )
+            with patch("kage_michi.infrastructure.ui_runtime.calculate_shadows_cached") as shadows, \
+                 patch("kage_michi.infrastructure.ui_runtime.calculate_route_comparison_cached") as route:
+                app.run()
+                self.assertTrue(any(m.label == "距離増加" for m in app.metric))
+                app.number_input(key="start_latitude").set_value(34.231).run()
+                self.assertFalse(app.exception)
+                self.assertFalse(app.metric)
+                self.assertTrue(any("前回の経路を非表示" in w.value for w in app.warning))
+                shadows.assert_not_called()
+                route.assert_not_called()
+
+    @unittest.skipUnless((ROOT / "data/prepared/wakayama-station/manifest.json").exists(),
+                         "Representative integration requires prepared Wakayama dataset")
+    def test_same_time_and_missing_comparison_date_are_explicit(self):
         app = AppTest.from_file(str(ROOT / "src/streamlit_app.py")).run(timeout=30)
         app.date_input[0].set_value(date(2026, 8, 11)).run()
-        next(b for b in app.button if b.label == "経路を計算").click().run(timeout=60)
-        self.assertFalse(app.exception)
-        self.assertTrue(any(m.label == "距離増加" for m in app.metric))
-        self.assertTrue(any("最短ルート" in item.value and "日陰優先ルート" in item.value
-                            for item in app.markdown))
-        self.assertTrue(any("地図凡例" in item.value for item in app.caption))
-        with patch("kage_michi.infrastructure.ui_runtime.calculate_shadows_cached") as shadows, \
-             patch("kage_michi.infrastructure.ui_runtime.calculate_route_comparison_cached") as route:
-            app.run()
-            self.assertTrue(any(m.label == "距離増加" for m in app.metric))
-            app.number_input(key="start_latitude").set_value(34.231).run()
-            self.assertFalse(app.exception)
-            self.assertFalse(app.metric)
-            self.assertTrue(any("前回の経路を非表示" in w.value for w in app.warning))
-            shadows.assert_not_called()
-            route.assert_not_called()
+        app.date_input[1].set_value(date(2026, 8, 11)).run()
+        app.time_input[1].set_value(app.time_input[0].value).run()
+        next(b for b in app.button if b.label == "2時刻を比較").click().run(timeout=60)
+        self.assertTrue(any("異なる日時" in item.value for item in app.error))
+
+        app.date_input[1].set_value(date(2026, 8, 12)).run()
+        next(b for b in app.button if b.label == "2時刻を比較").click().run(timeout=60)
+        self.assertTrue(
+            any("対象日時=2026-08-12" in item.value for item in app.error)
+        )

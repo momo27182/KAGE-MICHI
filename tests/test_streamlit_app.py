@@ -17,7 +17,7 @@ class StreamlitAppTests(unittest.TestCase):
         self.assertEqual(app.title[0].value, "KAGE-MICHI")
         self.assertIn("出発地の候補を検索", [button.label for button in app.button])
         self.assertIn("目的地の候補を検索", [button.label for button in app.button])
-        self.assertIn("経路を計算", [button.label for button in app.button])
+        self.assertIn("2時刻を比較", [button.label for button in app.button])
         self.assertIn("再計算範囲", app.info[0].value)
         self.assertTrue(any("Nominatim" in item.value for item in app.caption))
 
