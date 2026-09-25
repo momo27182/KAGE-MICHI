@@ -1,0 +1,20 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "reference_time": "2026/09/25 15:00:00",
+      "wbgt_no": 65042,
+      "forecast_val": "287",
+      "forecast_time": "2026/09/25 18:00:00",
+      "flag": 0
+    },
+    {
+      "reference_time": "2026/09/25 15:00:00",
+      "wbgt_no": 65042,
+      "forecast_val": "",
+      "forecast_time": "2026/09/25 21:00:00",
+      "flag": 9
+    }
+  ],
+  "count": 2
+}

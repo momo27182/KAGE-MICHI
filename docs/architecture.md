@@ -15,6 +15,7 @@
 | `shadows` | 日時と空間データから影を計算する境界 | `models`, `data` |
 | `routing` | 空間データと影から徒歩経路を探索する境界 | `models`, `data`, `shadows` |
 | `heat` | 気象条件と経路から暑熱リスクを評価する境界 | `models` |
+| `weather` | 公式WBGT・公的発表の型、取得境界、キャッシュ | なし |
 | `application` | 各境界を呼び出し、1回のルート計画処理を組み立てる | 上記すべて |
 | `presentation` | 結果をUIへ渡す表示用データへ変換する | `models` |
 
@@ -31,6 +32,7 @@ application -> data ------> models
             -> shadows ----> models
             -> routing ----> models
             -> heat -------> models
+            -> weather
 ```
 
 - `models`は他の製品モジュールをimportしない

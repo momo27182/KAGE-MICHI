@@ -17,6 +17,7 @@ PRODUCT_MODULES = {
     "shadows",
     "routing",
     "heat",
+    "weather",
     "application",
     "presentation",
     "ui",
