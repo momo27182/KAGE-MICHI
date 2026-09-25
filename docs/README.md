@@ -11,5 +11,6 @@
 - `edge-shade-comparison.json`: 固定条件で再現した道路日陰率比較の小さな結果スナップショット。
 - `precomputed-shade.md`: 5分刻み道路日陰率の生成、保存、検証、夜間の意味、実測結果。
 - `precomputed-shade-benchmark.json`: 固定日24時間・288時刻の小さな実測スナップショット。
+- `time-comparison.md`: 基準日時と比較日時の4経路表示、エラー方針、キャッシュ、実測結果。
 - `decisions/`: 後から変更コストが高い技術判断と理由をADRとして保存する。
 

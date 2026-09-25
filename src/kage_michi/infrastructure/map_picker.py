@@ -75,6 +75,8 @@ def render_picker(
     coordinates=(),
     shortest_coordinates=(),
     facilities: tuple[FacilityMarker, ...] = (),
+    comparison_coordinates=(),
+    comparison_shortest_coordinates=(),
 ) -> None:
     if st.session_state.get("map_scope") != scope_key:
         clear_candidate()
@@ -87,7 +89,7 @@ def render_picker(
     st.radio("変更する地点", ["start", "destination"], key="map_role",
              format_func=lambda role: "出発地" if role == "start" else "目的地",
              horizontal=True, on_change=clear_candidate)
-    st.caption("地図クリック → 候補を地点へ反映 → サイドバーの「経路を計算」。円はデータの対象範囲です。")
+    st.caption("地図クリック → 候補を地点へ反映 → サイドバーの「2時刻を比較」。円はデータの対象範囲です。")
     pending = st.session_state.get("map_pending")
     if pending:
         st.write(f"候補: {pending.latitude:.6f}, {pending.longitude:.6f}")
@@ -138,13 +140,34 @@ def render_picker(
         folium.Marker([pending.latitude, pending.longitude], tooltip="未確定の候補",
                       icon=folium.Icon(color="orange")).add_to(features)
     if len(coordinates) >= 2:
-        folium.PolyLine(coordinates, color="#167d4a", weight=7).add_to(features)
+        folium.PolyLine(
+            coordinates,
+            color="#167d4a",
+            weight=7,
+            tooltip="基準時刻・日陰優先",
+        ).add_to(features)
     if len(shortest_coordinates) >= 2:
         folium.PolyLine(
             shortest_coordinates,
             color="#d32f2f",
             weight=4,
             dash_array="8, 8",
+            tooltip="基準時刻・最短",
+        ).add_to(features)
+    if len(comparison_coordinates) >= 2:
+        folium.PolyLine(
+            comparison_coordinates,
+            color="#1565c0",
+            weight=6,
+            tooltip="比較時刻・日陰優先",
+        ).add_to(features)
+    if len(comparison_shortest_coordinates) >= 2:
+        folium.PolyLine(
+            comparison_shortest_coordinates,
+            color="#ef6c00",
+            weight=3,
+            dash_array="4, 7",
+            tooltip="比較時刻・最短",
         ).add_to(features)
     facility_styles = {
         "convenience": ("コンビニ", "#7b1fa2"),
