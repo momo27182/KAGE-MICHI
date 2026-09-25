@@ -4,9 +4,9 @@
 
 ## 現在のPhase・GitHub
 
-Phase 4「道路日陰率の改善」は完了。Phase 5「気象・暑熱評価」のIssue #37を調査中。
+Phase 4「道路日陰率の改善」は完了。Phase 5「気象・暑熱評価」を進行中。
 
-- ブランチ: `codex/issue-37-weather-heat-research`。`main`の`649593d`から作成。
+- ブランチ: `codex/issue-39-weather-cache`。`main`の`39de405`から作成。
 - [PR #30](https://github.com/momo27182/KAGE-MICHI/pull/30)はReady化・squash merge済み。
 - [Issue #29](https://github.com/momo27182/KAGE-MICHI/issues/29)は自動クローズ。
 - [PR #32](https://github.com/momo27182/KAGE-MICHI/pull/32)はReady化・squash merge済み。
@@ -28,12 +28,21 @@ Phase 4「道路日陰率の改善」は完了。Phase 5「気象・暑熱評価
 - 統合後も`PYTHONPATH=src`を明示した全79テスト（15 subtests）、compileall、差分検査に成功。
 - Issue #35完了により、直前集計基準では全体24/28件、Phase 4は6/6件完了。
 - Phase 5の未完了TODOは「気象APIと暑熱指標を選定する」「気象データ取得とキャッシュを実装する」の2件で、どちらもP1・2日。
-- [Issue #37](https://github.com/momo27182/KAGE-MICHI/issues/37)「気象APIと暑熱指標を選定する」は調査と文書化まで完了。Notion TODOは進行中。
+- [PR #38](https://github.com/momo27182/KAGE-MICHI/pull/38)はReady化・squash merge済み。マージコミットは`39de405`。
+- [Issue #37](https://github.com/momo27182/KAGE-MICHI/issues/37)「気象APIと暑熱指標を選定する」は自動クローズ。Notion TODOは完了・完了条件確認済み。
 - 環境省の暑さ指数Web APIを地点WBGT、熱中症警戒情報CSVを公的発表の情報源として採用する。両者は別データ・別表示とし、独自の警戒アラートへ合成しない。
 - 予測・推定実況・実測実況、品質、発表／対象／取得時刻、欠測、期限切れ、運用期間外を保持するデータ契約案を作成。
 - 気象庁アメダスは将来の補助表示候補とし、未文書化Web JSONには依存しない。APIクライアント、キャッシュ、画面、経路コストは次Issue以降。
 - 詳細は`docs/weather-heat-source-selection.md`とADR 0005。
-- [Draft PR #38](https://github.com/momo27182/KAGE-MICHI/pull/38)を作成。本文に`Closes #37`を記載し、ブランチは1コミット構成。
+- 統合後の`main`でも`PYTHONPATH=src`を明示した全79テスト（15 subtests）、compileall、差分検査に成功。
+- Issue #37完了により、直前集計基準では全体25/28件、Phase 5は1/2件完了。
+- [Issue #39](https://github.com/momo27182/KAGE-MICHI/issues/39)「気象データ取得とキャッシュを実装する」を実装・検証中。Notion TODOは進行中。
+- 公式WBGTと警戒情報の別クライアント・別データ型、20分キャッシュ、予測90分・実況60分の期限、欠測・運用期間外・障害状態、fixtureテスト、手動疎通確認を完了条件とする。
+- 依存のない`weather`ドメイン層、環境省JSON・CSVアダプター、最大3回の短い指数バックオフ、期限切れ成功値へのフォールバック、経路機能を止めない集約サービスを実装。
+- 公式発表状態とキャッシュ鮮度を分離。予測の10倍整数と実況の小数℃を正しく換算し、実測地点でも品質コードを保持する。
+- fixtureテストを追加し、全92テスト（16 subtests）、compileall、差分検査に成功。各情報流の20分再利用、予測90分・実況60分の期限、年度別運用期間外、成功0件の明示的欠測化を検証。
+- 和歌山地点65042・地域300000で公式サービスへ疎通。22時発表の予測17件、直近2時間の実況2件、17時警戒情報を取得。予測21.0℃、有効な最新実況21.7℃、警戒情報は発表なしを時刻・出典付きで解析した。
+- [Draft PR #40](https://github.com/momo27182/KAGE-MICHI/pull/40)を作成。本文に`Closes #39`を記載し、ブランチは1コミット構成。
 
 ## Issue #29の結果
 
@@ -47,9 +56,9 @@ Phase 4「道路日陰率の改善」は完了。Phase 5「気象・暑熱評価
 
 ブロッカーなし。通常ユーザーで起動済みの旧Streamlitは成果物の所有権により読み取り拒否となったが、成果物を生成した実行環境で検証用サーバーを起動し、実ブラウザー確認まで完了した。WindowsのACL・所有権変更は成功しておらず、永続変更は発生していない。
 
-1. PR #38を最終レビューする。
+1. PR #40を最終レビューする。
 2. 問題がなければReady化・squash mergeする。
-3. 統合後、次Issueで公式データ取得と20分キャッシュを実装する。
+3. 統合後、Phase 5の完了判定と次Phase候補の確認を行う。
 
 ## 維持する判断
 

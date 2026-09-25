@@ -1,0 +1,39 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "wbgt_no": 65042,
+      "wbgt_date": "2026/09/25 15:00:00",
+      "wbgt_class": 0,
+      "area_cd": 6,
+      "pref_cd": 30,
+      "wbgt_WI": "1.0",
+      "wbgt_WO": "28.6",
+      "wbgt_Tw": "25.1",
+      "wbgt_Tg": "33.0"
+    },
+    {
+      "wbgt_no": 65042,
+      "wbgt_date": "2026/09/25 15:30:00",
+      "wbgt_class": 1,
+      "area_cd": 6,
+      "pref_cd": 30,
+      "wbgt_WI": null,
+      "wbgt_WO": null,
+      "wbgt_Tw": null,
+      "wbgt_Tg": null
+    },
+    {
+      "wbgt_no": 65042,
+      "wbgt_date": "2026/09/25 16:00:00",
+      "wbgt_class": 1,
+      "area_cd": 6,
+      "pref_cd": 30,
+      "wbgt_WI": "3.0",
+      "wbgt_WO": "28.1",
+      "wbgt_Tw": "24.8",
+      "wbgt_Tg": "32.4"
+    }
+  ],
+  "count": 3
+}
