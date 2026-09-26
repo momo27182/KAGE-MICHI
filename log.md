@@ -864,3 +864,21 @@ Issue #9の差分と画面を最終確認し、コミット・プッシュ、`Cl
 - Issue #39の実装・fixture・疎通手順・記録を1コミットへまとめ、`codex/issue-39-weather-cache`へプッシュ。
 - [Draft PR #40 気象データ取得とキャッシュを実装する](https://github.com/momo27182/KAGE-MICHI/pull/40)を作成し、本文に`Closes #39`を記載。次は最終レビュー後、問題がなければReady化・squash mergeする。
 - PR #40の最終レビューで、API成功0件が問題なしの空配列となり欠測をUIへ伝えられない点を修正。予測・実況とも値なし`missing`データを返す回帰テストを追加し、全92テスト成功。
+
+## 2026-09-25 PR #40をsquash merge・Phase 5完了
+
+- PR #40の全13ファイルを最終レビュー。キャッシュ、期限判定、公式状態と鮮度の分離、障害時フォールバック、安全表現を確認。
+- 成功応答0件が問題なしの空配列になる不具合を修正し、明示的な`missing`データを返す回帰テストを追加。1コミット構成を維持し、全92テスト（16 subtests）、compileall、差分検査に成功。
+- GitHubは`MERGEABLE`・`CLEAN`、`Closes #39`記載済み、必須チェック登録なしを確認。PR #40をReady化してsquash merge。mainコミット`a0fac4a`。
+- Issue #39は自動クローズ。ローカルmainを`origin/main`へfast-forward同期し、統合後も全92テスト（16 subtests）、compileall、差分検査に成功。
+- Notion TODOを完了・完了条件確認済みへ更新。Phase 5は2/2件、直前集計基準で全体26/28件完了。
+
+## 2026-09-26 Issue #41着手・現地検証基盤を実装
+
+- [Issue #41 影推定の現地検証を実施する](https://github.com/momo27182/KAGE-MICHI/issues/41)用に`codex/issue-41-field-validation`を作成。Notion TODOを進行中へ変更。
+- 和歌山駅周辺の代表地点、午前・正午・午後、同一区間・同方向での撮影、時刻・天候・写真参照・実影要因を記録する手順を`docs/field-validation.md`へ定義。
+- CSVテンプレート生成、タイムゾーン・緯度経度・日陰率・列構成・ID重複の検証、符号付き平均誤差・平均絶対誤差・最大絶対誤差・10ポイント以内件数・実影要因別集計を実装。
+- 写真はGitへ直接含めず、人物・車両番号・住宅内部などの個人情報に配慮する方針を明記。結果は医療安全や未観測地域の精度を保証しない。
+- 新規4件を含む全96テスト、compileall、テンプレートの往復読込・JSON集計に成功。既存機能への回帰なし。
+- 現地データ未取得のためIssue #41とTODOは進行中を維持。次は差分確認後、1コミット・Draft PR作成。その後、晴天時の現地記録で誤差要因と改善候補を確定する。
+- 実装・手順・テスト・記録を1コミットへまとめてプッシュし、[Draft PR #42](https://github.com/momo27182/KAGE-MICHI/pull/42)を作成。本文に`Closes #41`を記載。
