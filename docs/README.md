@@ -14,5 +14,6 @@
 - `time-comparison.md`: 基準日時と比較日時の4経路表示、エラー方針、キャッシュ、実測結果。
 - `weather-heat-source-selection.md`: 公式の気象・暑熱情報源比較、採用方針、データ契約、安全表示、障害時方針。
 - `weather-data-integration.md`: 公式WBGT・警戒情報の取得、20分キャッシュ、期限・障害状態、手動疎通確認。
+- `field-validation.md`: 影推定と現地観察を比較する地点・時刻・撮影・CSV記録・集計手順。
 - `decisions/`: 後から変更コストが高い技術判断と理由をADRとして保存する。
 
